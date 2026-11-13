@@ -1,0 +1,215 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{06}{Estrutura Básica de Programas}{Sequência, entrada e saída, expressões simples}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Programação estruturada: três blocos de construção (Cap.~3.1)
+    \item \textbf{Sequência} (3.1.1): executar comandos em ordem
+    \item Saída com \texttt{print}: separadores e formatação
+    \item Entrada com \texttt{input} e conversão de tipos
+    \item Expressões e precedência de operadores
+    \item \textbf{Aula prática} no laboratório
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Programação estruturada}
+  Todo programa pode ser construído com apenas três \textbf{blocos}:
+  \vspace{1ex}
+  \begin{columns}[T]
+    \column{0.32\textwidth}
+    \begin{block}{Sequência}
+      Um comando depois do outro, de cima para baixo.
+    \end{block}
+    \column{0.32\textwidth}
+    \begin{block}{Seleção}
+      Decidir entre caminhos: \texttt{if}/\texttt{else} (Aula 7).
+    \end{block}
+    \column{0.32\textwidth}
+    \begin{block}{Iteração}
+      Repetir um bloco: \texttt{while}/\texttt{for} (Aula 8).
+    \end{block}
+  \end{columns}
+  \vspace{2ex}
+  Hoje: \textbf{sequência}. A ordem importa: o computador nunca ``adivinha'' o que vem depois.
+\end{frame}
+
+\begin{frame}[fragile]{Sequência: a ordem dos comandos}
+\begin{lstlisting}
+base = 5
+altura = 6
+area_triang = (base * altura) / 2
+print('A área do triângulo com base', base,
+      'e altura', altura, 'é', area_triang)
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+A área do triângulo com base 5 e altura 6 é 15.0
+\end{lstlisting}
+  \begin{alertblock}{O que acontece se invertermos as linhas 3 e 4?}
+    \texttt{NameError}: a variável \texttt{area\_triang} ainda não existe quando \texttt{print} é executado.
+  \end{alertblock}
+  \fonte{code/Cap2/prog.2.5\_area\_triangulo\_v3.py}
+\end{frame}
+
+\begin{frame}[fragile]{Evolução do programa: três versões}
+\begin{lstlisting}
+# v1: um valor "mágico" (sem contexto)
+print((5*6)/2)
+
+# v2: guarda o resultado e explica a saída
+area_triang = (5*6)/2
+print('A área do triângulo é ', area_triang)
+
+# v3: dados em variáveis com nomes claros
+base = 5
+altura = 6
+\end{lstlisting}
+  \begin{itemize}
+    \item Cada versão é mais fácil de \alert{ler e modificar} que a anterior
+    \item Evitar números ``soltos'' no meio do código
+  \end{itemize}
+  \fonte{code/Cap2/prog.2.3, prog.2.4, prog.2.5}
+\end{frame}
+
+\begin{frame}[fragile]{Saída: a função \texttt{print}}
+\begin{lstlisting}
+print("Olá", "mundo")             # Olá mundo
+print("Olá", "mundo", sep="-")    # Olá-mundo
+print("a", end=" ")               # não pula linha
+print("b")                        # a b
+print("Total:", 7 * 3)            # Total: 21
+\end{lstlisting}
+  \begin{itemize}
+    \item Vários argumentos separados por vírgula; por padrão, separados por um espaço
+    \item \texttt{sep} troca o separador; \texttt{end} troca o final (padrão: nova linha)
+    \item \texttt{\textbackslash n} = nova linha, \texttt{\textbackslash t} = tabulação
+  \end{itemize}
+  \fonte{code/Cap3/prog.3.15\_contagem.py (usa \texttt{end=' '})}
+\end{frame}
+
+\begin{frame}[fragile]{Saída formatada}
+\begin{lstlisting}
+import math
+x = math.pi
+print("Pi vale", x)
+print("Pi vale {:.2f}".format(x))      # duas casas decimais
+print(f"Pi vale {x:.4f}")               # f-string
+print(f"{'Graus':>9}{'Seno':>9}")       # alinha à direita em 9 colunas
+print(f"{30:>9.2f}{math.sin(math.radians(30)):>9.2f}")
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+Pi vale 3.141592653589793
+Pi vale 3.14
+Pi vale 3.1416
+    Graus     Seno
+    30.00     0.50
+\end{lstlisting}
+  \fonte{code/Cap6/prog.6.17\_tabela\_senos\_arquivo\_f.py}
+\end{frame}
+
+\begin{frame}[fragile]{Entrada: a função \texttt{input}}
+\begin{lstlisting}
+nome = input("Qual é o seu nome? ")
+print("Olá,", nome)
+idade = input("Qual a sua idade? ")
+print(type(idade))             # <class 'str'>
+\end{lstlisting}
+  \begin{alertblock}{\texttt{input} sempre devolve \texttt{str}!}
+    Para fazer contas é preciso converter: \texttt{int(\ldots)} ou \texttt{float(\ldots)}.
+  \end{alertblock}
+  \begin{itemize}
+    \item O texto entre parênteses é o \emph{prompt} exibido ao usuário
+    \item Se o usuário digitar algo inválido (\texttt{abc} para \texttt{int}), ocorre \texttt{ValueError}; trataremos na Aula 13
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{O erro clássico: somar textos}
+\begin{lstlisting}
+nota1 = input("Qual é a primeira nota? ")
+nota2 = input("E a segunda nota? ")
+nota_total = nota1 + nota2
+print("A soma é ", nota_total)
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+Qual é a primeira nota? 7
+E a segunda nota? 8
+A soma é  78
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{'7' + '8'} \(\Rightarrow\) \texttt{'78'} (concatenação de strings)
+    \item \textbf{Correção:} \texttt{nota1 = float(input(\ldots))}
+  \end{itemize}
+  \fonte{code/Cap3/prog.3.2\_testa\_input.py}
+\end{frame}
+
+\begin{frame}[fragile]{Programa completo: área de um quadrado}
+\begin{lstlisting}
+# lê o valor do lado
+lado = float(input("Digite o valor do lado do quadrado: "))
+# calcula a área
+area = lado * lado
+# imprime o resultado
+print("Área do quadrado:", area)
+\end{lstlisting}
+  Estrutura típica de um programa simples: \textbf{entrada \(\to\) processamento \(\to\) saída}.
+  \begin{exampleblock}{Exercícios 3.1 e 3.2}
+    Versão com \texttt{int} e versão com \texttt{float}: qual a diferença para o lado \texttt{2.5}?
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Expressões e precedência}
+  \centering\small
+  \begin{tabular}{cl}
+    \toprule
+    Ordem & Operadores\\
+    \midrule
+    1 & parênteses \texttt{( )}\\
+    2 & potência \texttt{**}\\
+    3 & \texttt{+x}, \texttt{-x} (sinal)\\
+    4 & \texttt{*}, \texttt{/}, \texttt{//}, \texttt{\%}\\
+    5 & \texttt{+}, \texttt{-}\\
+    6 & comparações \texttt{==}, \texttt{<}, \ldots\\
+    7 & \texttt{not}, \texttt{and}, \texttt{or}\\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{1.5ex}\normalsize
+  \(2 + 3 \times 4 = 14\), mas \((2+3)\times4 = 20\). Na dúvida, \alert{use parênteses}.
+  \vspace{1ex}
+
+  \footnotesize Cuidado: \(\dfrac{a+b}{2}\) é \texttt{(a + b) / 2}, e não \texttt{a + b / 2}.
+\end{frame}
+
+\begin{frame}[fragile]{Atividade prática no laboratório}
+  Escreva e execute:
+  \begin{enumerate}
+    \item Programa que lê \textbf{base} e \textbf{altura} e imprime a área do triângulo (formato com 2 casas)
+    \item Programa que lê uma temperatura em Celsius e imprime em Fahrenheit: \(F = \tfrac{9}{5}C + 32\)
+    \item Programa que lê o número de segundos e mostra em horas, minutos e segundos (use \texttt{//} e \texttt{\%})
+    \item Programa que calcula a área de uma esfera de raio 5: \(A=4\pi r^2\) \hfill {\footnotesize (Exercício 2.18)}
+  \end{enumerate}
+  \begin{exampleblock}{Dica para o item 3}
+    \texttt{h = seg // 3600} \hspace{1em} \texttt{resto = seg \% 3600} \hspace{1em} \texttt{m = resto // 60}
+  \end{exampleblock}
+\end{frame}
+
+\exercicios{2}{%
+  \begin{itemize}\small
+    \item \textbf{2.9, 2.10} (área, segundos após a meia-noite)
+    \item \textbf{2.17, 2.18} (hipotenusa, área da esfera)
+  \end{itemize}
+  \vspace{0.5ex}
+  \footnotesize Capítulo 3: \href{\siteurl exercicios/cap3/}{\texttt{exercicios/cap3/}} -- \textbf{3.1, 3.2}.}
+
+\resumo{
+  \item Um programa estruturado combina sequência, seleção e iteração
+  \item \texttt{print} formata a saída; \texttt{input} lê \emph{texto}, sempre
+  \item Converta com \texttt{int()} e \texttt{float()} antes de calcular
+  \item Parênteses tornam as expressões claras e seguras
+  \item Próxima aula: estruturas de decisão (\texttt{if}, \texttt{elif}, \texttt{else})
+}
+
+\end{document}

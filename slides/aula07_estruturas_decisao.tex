@@ -1,0 +1,235 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{07}{Estruturas de Decisão}{Seleção simples, composta e em sequência: if, else, elif}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Tomando uma decisão: \texttt{if} e \texttt{else} (Cap.~3.2)
+    \item Indentação: a estrutura do bloco em Python
+    \item Testes em sequência: \texttt{elif} (3.3)
+    \item Condições compostas: \texttt{and}, \texttt{or}, \texttt{not} (3.4)
+    \item Decisões aninhadas
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Seleção: o programa escolhe o caminho}
+  \begin{center}
+  \begin{tikzpicture}[scale=0.85,transform shape,node distance=1cm,
+      proc/.style={draw=uerjazul,fill=uerjcinza,minimum width=2.4cm,minimum height=0.7cm,font=\small},
+      dec/.style={draw=uerjazul,diamond,aspect=2.5,fill=uerjcinza,font=\small},
+      seta/.style={-{Stealth},thick,uerjazul}]
+    \node[dec] (c) {condição?};
+    \node[proc,below left=1cm and 1.3cm of c] (v) {bloco \texttt{if}};
+    \node[proc,below right=1cm and 1.3cm of c] (f) {bloco \texttt{else}};
+    \node[proc,below=2cm of c] (fim) {continua};
+    \draw[seta] ([yshift=0.8cm]c.north)--(c);
+    \draw[seta] (c)-|node[above left,font=\scriptsize]{verdadeira}(v);
+    \draw[seta] (c)-|node[above right,font=\scriptsize]{falsa}(f);
+    \draw[seta] (v)|-(fim);
+    \draw[seta] (f)|-(fim);
+  \end{tikzpicture}
+  \end{center}
+  \vspace{-1ex}
+  A condição é uma expressão cujo valor é \texttt{True} ou \texttt{False} (comparações da Aula 5).
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{if} simples e composto}
+\begin{lstlisting}
+numero = int(input("Digite um número inteiro: "))
+if numero % 2 == 0:
+    print(numero, "é par")
+else:
+    print(numero, "é ímpar")
+\end{lstlisting}
+  \begin{itemize}
+    \item Os dois-pontos \texttt{:} abrem o bloco; o \emph{recuo} (4 espaços) define o que pertence a ele
+    \item \texttt{else} é opcional: sem ele, nada acontece quando a condição é falsa
+    \item \texttt{numero \% 2 == 0}: o resto da divisão por 2 identifica números pares
+  \end{itemize}
+  \fonte{Exercício 3.4 do livro}
+\end{frame}
+
+\begin{frame}[fragile]{Indentação é sintaxe}
+\begin{lstlisting}
+lado = float(input("Lado: "))
+   area = lado * lado      # recuo inesperado
+print("Área:", area)
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+IndentationError: unexpected indent
+\end{lstlisting}
+  \begin{itemize}
+    \item Em C ou Java as chaves \texttt{\{ \}} delimitam blocos; em Python é a \textbf{indentação}
+    \item Misturar tabulação e espaços gera erros difíceis de ver: configure o editor para usar 4 espaços
+    \item Exercício 3.3: provoque propositalmente erros de indentação e leia as mensagens
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Múltiplo de outro número}
+\begin{lstlisting}
+numero1 = int(input("Digite o primeiro número: "))
+numero2 = int(input("Digite o segundo número: "))
+if numero2 % numero1 == 0:
+    print(numero2, "é múltiplo de", numero1)
+else:
+    print(numero2, "não é múltiplo de", numero1)
+\end{lstlisting}
+  \begin{alertblock}{E se \texttt{numero1} for 0?}
+    \texttt{ZeroDivisionError}. Como evitar? Com outra decisão antes do cálculo, ou tratando a exceção (Aula 13).
+  \end{alertblock}
+  \fonte{Exercício 3.5 do livro}
+\end{frame}
+
+\begin{frame}[fragile]{Testes em sequência: \texttt{elif}}
+\begin{lstlisting}
+numero = int(input("Digite um número: "))
+if numero % 3 == 0:
+    print(numero, "é divisível por 3")
+elif numero % 5 == 0:
+    print(numero, "é divisível por 5")
+elif numero % 7 == 0:
+    print(numero, "é divisível por 7")
+else:
+    print(numero, "não é divisível por 3, 5 ou 7")
+\end{lstlisting}
+  \begin{itemize}
+    \item Os testes são feitos \alert{em ordem}; ao primeiro verdadeiro, os demais são ignorados
+    \item Para 15 o programa só diz ``divisível por 3''. Como mostrar \emph{todos}? (Exercício 3.6)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Aninhamento versus \texttt{elif}}
+\begin{lstlisting}
+nota1 = float(input("Qual é a primeira nota? "))
+nota2 = float(input("E a segunda nota? "))
+media = (nota1 + nota2) / 2
+print("A média é ", media)
+if media < 7:
+    if media < 4:
+        print("Ficou reprovado :(")
+    else:
+        print("Ficou para prova final")
+else:
+    print("Passou direto!")
+\end{lstlisting}
+  \fonte{code/Cap3/prog.3.3\_calcula\_final\_reprova.py}
+\end{frame}
+
+\begin{frame}[fragile]{Condições compostas: \texttt{and}, \texttt{or}, \texttt{not}}
+  \centering\small
+  \begin{tabular}{ccc|ccc}
+    \toprule
+    A & B & A \texttt{and} B & A \texttt{or} B & \texttt{not} A\\
+    \midrule
+    V & V & V & V & F\\
+    V & F & F & V & F\\
+    F & V & F & V & V\\
+    F & F & F & F & V\\
+    \bottomrule
+  \end{tabular}
+  \vspace{1ex}
+\begin{lstlisting}
+letra = input('Digite H para Homem e M para Mulher ')
+if letra == 'H' or letra == 'h':
+    print("Você escolheu Homem.")
+elif letra == 'M' or letra == 'm':
+    print("Você escolheu Mulher.")
+else:
+    print("Você escolheu outra opção.")
+\end{lstlisting}
+  \fonte{code/Cap3/prog.3.5\_h\_e\_m.py}
+\end{frame}
+
+\begin{frame}[fragile]{Comparação encadeada: o desconto por idade}
+\begin{lstlisting}
+idade = int(input('Qual a idade? '))
+if idade >= 0 and idade < 12:
+    print('Desconto é de 100%')
+elif idade >= 12 and idade < 26:
+    print('Desconto é de 50%')
+else:
+    print('Sem Desconto')
+\end{lstlisting}
+  Em Python é possível escrever de forma mais próxima da matemática:
+\begin{lstlisting}
+if 0 <= idade < 12:
+    print('Desconto é de 100%')
+elif 12 <= idade < 26:
+    print('Desconto é de 50%')
+\end{lstlisting}
+  \fonte{code/Cap3/prog.3.9, prog.3.10}
+\end{frame}
+
+\begin{frame}{Desafio de lógica: o ano bissexto}
+  Um ano é bissexto se for divisível por 4, \textbf{exceto} os divisíveis por 100, \textbf{a menos que} também sejam divisíveis por 400.
+  \vspace{1ex}
+  \begin{center}\small
+    \begin{tabular}{rl}
+      \toprule
+      Ano & Bissexto?\\
+      \midrule
+      2024 & sim (div.\ por 4, não por 100)\\
+      1900 & \alert{não} (div.\ por 100, não por 400)\\
+      2000 & sim (div.\ por 400)\\
+      2023 & não\\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+  \vspace{1ex}
+  \textbf{Tente:} escreva a condição composta antes de ver a próxima página.
+\end{frame}
+
+\begin{frame}[fragile]{Ano bissexto: três versões}
+\begin{lstlisting}
+ano = int(input('Digite um ano: '))
+if (ano % 4 == 0 and not(ano % 100 == 0)) or ano % 400 == 0:
+    print('Ano é bissexto')
+\end{lstlisting}
+  \textbf{Versão mais legível} (simplificando \texttt{not(\ldots == 0)}) e com \texttt{else}:
+\begin{lstlisting}
+ano = int(input('Digite um ano: '))
+if (ano % 4 == 0 and ano % 100 != 0) or ano % 400 == 0:
+    print('Ano é bissexto')
+else:
+    print('Ano não é bissexto')
+\end{lstlisting}
+  \small Os parênteses explicitam a precedência: \texttt{and} é avaliado antes de \texttt{or}.\\
+  \fonte{code/Cap3/prog.3.6\_bissexto.py, prog.3.7, prog.3.8}
+\end{frame}
+
+\begin{frame}{Exercícios resolvidos no site: leitura guiada}
+  \begin{itemize}
+    \item \textbf{3.7} Aumento diferenciado de salários por faixa
+    \item \textbf{3.8} Classificação do triângulo (equilátero, isósceles, escaleno)
+    \item \textbf{3.9} Classificação por faixa etária
+    \item \textbf{3.10} Enunciado atualizado: confira a versão do site
+  \end{itemize}
+  \begin{block}{Roteiro para resolver qualquer exercício}
+    \begin{enumerate}\small
+      \item Quais são as \textbf{entradas} e as \textbf{saídas}?
+      \item Quais são os \textbf{casos} (faixas, exceções)? Faça uma tabela.
+      \item Escreva o pseudocódigo, depois o Python.
+      \item \textbf{Teste} com um valor de cada caso e com os \emph{limites}.
+    \end{enumerate}
+  \end{block}
+\end{frame}
+
+\exercicios{3}{%
+  \begin{itemize}\small
+    \item Decisão simples e composta: \textbf{3.4, 3.5}
+    \item Testes em sequência: \textbf{3.6}
+    \item Condições compostas: \textbf{3.7, 3.8, 3.9, 3.10}
+  \end{itemize}}
+
+\resumo{
+  \item \texttt{if}/\texttt{else} escolhe entre dois caminhos; \texttt{elif} encadeia vários
+  \item O bloco é definido pela \textbf{indentação} (4 espaços)
+  \item \texttt{and}, \texttt{or}, \texttt{not} combinam condições; use parênteses
+  \item Teste sempre os valores nos \emph{limites} das faixas
+  \item Próxima aula: iteração (\texttt{while} e \texttt{for})
+}
+
+\end{document}

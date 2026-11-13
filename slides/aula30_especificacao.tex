@@ -1,0 +1,149 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{30}{Especificação do Projeto}{Do problema à estrutura do programa}
+
+\begin{document}
+\capa
+
+\begin{frame}{Objetivo da aula}
+  Cada grupo entrega uma \textbf{especificação} do projeto: descrição detalhada do problema, das funcionalidades principais e da estrutura prevista do programa.
+  \vspace{1ex}
+  \begin{itemize}
+    \item Feedback \textbf{individualizado} para cada grupo
+    \item Avaliação da \textbf{viabilidade}: o escopo cabe nas aulas restantes?
+    \item Ajustes para que o projeto fique adequado ao nível da turma
+  \end{itemize}
+  \begin{exampleblock}{Lembrete do Cap.~9.1}
+    ``Pense antes de programar'': uma boa especificação economiza horas de retrabalho.
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Roteiro do documento de especificação (1 a 2 páginas)}
+  \begin{enumerate}
+    \item \textbf{Título e integrantes}
+    \item \textbf{Problema}: o que será resolvido, para quem, por quê
+    \item \textbf{Dados}: entradas (usuário, arquivos), saídas (tela, arquivos, gráficos)
+    \item \textbf{Funcionalidades}: lista numerada, em ordem de prioridade
+    \item \textbf{Estrutura do programa}: módulos e funções previstos
+    \item \textbf{Estruturas de dados}: listas, dicionários, tuplas, arrays, DataFrames
+    \item \textbf{Casos de teste e casos-limite}: o que pode dar errado?
+    \item \textbf{Divisão de tarefas e cronograma}
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Exemplo: Gestão de insumos e custos (Eng.\ Civil/Produção)}
+  \small
+  \begin{columns}[T]
+    \column{0.52\textwidth}
+    \textbf{Problema.} Pequena obra precisa controlar o estoque e o custo de insumos.\\[1ex]
+    \textbf{Entradas.} \texttt{insumos.csv} (nome, unidade, preço, estoque); comandos do usuário.\\[1ex]
+    \textbf{Saídas.} Relatório de custos, alerta de estoque baixo, gráfico dos 5 insumos mais caros.
+    \column{0.45\textwidth}
+    \textbf{Funcionalidades}
+    \begin{enumerate}
+      \item Cadastrar/editar insumo
+      \item Registrar entrada e saída de estoque
+      \item Calcular custo total e por categoria
+      \item Alertar quando estoque \(\le\) mínimo
+      \item Salvar e carregar do arquivo CSV
+      \item Gerar gráfico (Matplotlib)
+    \end{enumerate}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Exemplo: estrutura prevista}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+projeto_insumos/
+    principal.py        # menu e fluxo geral (main)
+    estoque.py          # regras: cadastra(), baixa(), custo_total(), alertas()
+    arquivos.py         # le_csv(), salva_csv()
+    graficos.py         # grafico_mais_caros(), grafico_por_categoria()
+    insumos.csv         # dados de exemplo
+    testes.py           # asserts das funções de estoque
+\end{lstlisting}
+  \textbf{Estrutura de dados:}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+estoque = {
+    "cimento": {"unidade": "saco", "preco": 38.5, "qtd": 120, "minimo": 30},
+    "areia":   {"unidade": "m3",   "preco": 95.0, "qtd": 15,  "minimo": 10},
+}
+\end{lstlisting}
+  \small Dicionário de dicionários (Aula 20): chave = nome do insumo; busca direta e legível.
+\end{frame}
+
+\begin{frame}{Exemplo para Eng.\ Elétrica/Mecânica}
+  \small
+  \begin{block}{Análise de ensaio de um resistor}
+    \textbf{Entradas:} arquivo CSV com tensão e corrente.\\
+    \textbf{Funcionalidades:} (1) ler e validar os dados; (2) ajustar a reta \(I=aV+b\) com NumPy; (3) estimar a resistência \(R=1/a\) e a incerteza; (4) detectar medidas discrepantes; (5) gráfico dos pontos com a reta; (6) relatório em arquivo texto.\\
+    \textbf{Casos-limite:} menos de 2 pontos, tensão repetida, arquivo vazio, valores não numéricos.
+  \end{block}
+  \begin{block}{Séries históricas (Eng.\ Ambiental/Cartográfica)}
+    \textbf{Entradas:} CSV de temperatura diária.\\
+    \textbf{Funcionalidades:} médias mensais e anuais com Pandas; anos mais quentes; gráfico de tendência; conversor de coordenadas.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Como especificar boas funcionalidades}
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+    \begin{alertblock}{Vago (evite)}
+      \begin{itemize}\small
+        \item ``O programa gerencia tudo''
+        \item ``Faz uns gráficos''
+        \item ``Trata os erros''
+      \end{itemize}
+    \end{alertblock}
+    \column{0.48\textwidth}
+    \begin{exampleblock}{Verificável (prefira)}
+      \begin{itemize}\small
+        \item ``Mostra o custo total e o de cada categoria, com 2 casas decimais''
+        \item ``Gera um gráfico de barras com os 5 itens mais caros e salva em PNG''
+        \item ``Se o arquivo não existe, avisa e cria um novo''
+      \end{itemize}
+    \end{exampleblock}
+  \end{columns}
+  \vspace{1ex}
+  \textbf{Teste:} para cada funcionalidade, escreva um caso de uso com entrada e resultado esperado.
+\end{frame}
+
+\begin{frame}{Planejando o tamanho do projeto}
+  \begin{itemize}
+    \item Classifique as funcionalidades: \textbf{essenciais} (sem elas não há programa), \textbf{desejáveis} e \textbf{extras}
+    \item Restam \textbf{5 aulas} (31 a 35): implemente primeiro o essencial
+    \item Estime: ``quantas funções? quantas linhas?'' (um projeto típico: 150 a 400 linhas)
+    \item Evite \emph{interfaces gráficas} e \emph{bancos de dados}: fora do escopo da disciplina
+  \end{itemize}
+  \begin{alertblock}{O ótimo é inimigo do bom}
+    Prefira um programa pequeno, correto e bem organizado a um grande que não funciona.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{Atividade desta aula}
+  \begin{enumerate}
+    \item Cada grupo escreve (ou finaliza) o documento de especificação seguindo o roteiro
+    \item O professor atende os grupos um a um e verifica:
+    \begin{itemize}\small
+      \item O problema está claro? Dá para testar?
+      \item O escopo é viável? O que é essencial?
+      \item A divisão em funções e dados faz sentido?
+    \end{itemize}
+    \item Ajustem a especificação com base no feedback
+    \item \textbf{Entrega ao fim da aula} (ou até a próxima, conforme combinado)
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Checklist da especificação}
+  \small
+  \begin{tabular}{@{}cl@{}}
+    $\square$ & O problema cabe em duas frases?\\
+    $\square$ & Entradas e saídas estão definidas, com formato dos arquivos?\\
+    $\square$ & Há pelo menos 5 funcionalidades verificáveis, priorizadas?\\
+    $\square$ & Há uma lista de funções/módulos e a estrutura de dados escolhida?\\
+    $\square$ & Os casos-limite e as entradas inválidas estão listados?\\
+    $\square$ & Cada integrante tem tarefas definidas?\\
+    $\square$ & Os dados de exemplo já estão disponíveis?\\
+  \end{tabular}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,228 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{23}{Arquivos}{Leitura e escrita de arquivos}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Por que arquivos? Memória volátil \emph{versus} armazenamento permanente
+    \item Abrindo, lendo e fechando (Cap.~6.4)
+    \item Escrevendo em arquivos (6.5)
+    \item O comando \texttt{with} e tratamento de erros
+    \item Arquivos CSV: dados em tabela
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Programas e dados persistentes}
+  \begin{columns}[T]
+    \column{0.55\textwidth}
+    \begin{itemize}
+      \item As variáveis vivem na \textbf{RAM}: desaparecem quando o programa termina
+      \item Para guardar resultados, ler medições ou trocar dados com outros programas usamos \textbf{arquivos}
+      \item Em Python, um arquivo de texto é visto como uma \emph{sequência de linhas} (strings)
+    \end{itemize}
+    \column{0.42\textwidth}
+    \begin{exampleblock}{Exemplos}
+      \begin{itemize}\small
+        \item resultados de um ensaio
+        \item log de um sensor
+        \item lista de alunos
+        \item planilhas exportadas em CSV
+      \end{itemize}
+    \end{exampleblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Abrindo e lendo: \texttt{open}}
+  Arquivo \texttt{nomes.txt}:
+\begin{lstlisting}[style=saida]
+João Araujo Ribeiro
+Grace Hopper
+Ada Lovelace
+\end{lstlisting}
+\begin{lstlisting}
+arquivo = open('nomes.txt', 'r')     # 'r' = read (leitura)
+linhas = arquivo.readlines()         # lista de strings
+arquivo.close()                      # libera o arquivo
+for linha in linhas:
+    print(linha)
+\end{lstlisting}
+  \begin{alertblock}{Por que as linhas saem com uma linha em branco a mais?}
+    Cada linha lida termina com \texttt{\textbackslash n}, e \texttt{print} acrescenta outro. Resolva com \texttt{rstrip()}.
+  \end{alertblock}
+  \fonte{code/Cap6/prog.6.12\_abrearquivo.py}
+\end{frame}
+
+\begin{frame}[fragile]{Formas de ler}
+\begin{lstlisting}
+# 1) linha por linha (não carrega o arquivo todo)
+arquivo = open('nomes.txt', 'r')
+for linha in arquivo:
+    print(linha.rstrip())
+arquivo.close()
+
+# 2) tudo como uma lista, já sem o \n
+arquivo = open('nomes.txt', 'r')
+linhas = [linha.rstrip() for linha in arquivo.readlines()]
+arquivo.close()
+
+# 3) tudo em uma única string
+texto = open('nomes.txt').read()
+linhas = texto.split('\n')
+\end{lstlisting}
+  \fonte{code/Cap6/prog.6.13, prog.6.14, prog.6.15 (abre arquivo)}
+\end{frame}
+
+\begin{frame}[fragile]{Escrevendo: modos \texttt{'w'} e \texttt{'a'}}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+import math
+
+arquivo = open('tabelaSenoCosseno.txt', 'w')    # 'w' = write
+arquivo.write(f"{'Graus':>9}{'Radianos':>9}{'Seno':>9}{'Cosseno':>9}\n")
+for graus in range(0, 361, 30):
+    rad = math.radians(graus)
+    arquivo.write(f"{graus:>9.2f}{rad:>9.2f}"
+                  f"{math.sin(rad):>9.2f}{math.cos(rad):>9.2f}\n")
+arquivo.close()
+\end{lstlisting}
+  \begin{center}\small
+  \begin{tabular}{cl}
+    \toprule
+    Modo & Efeito\\
+    \midrule
+    \texttt{'r'} & leitura (padrão); erro se o arquivo não existir\\
+    \texttt{'w'} & escrita; \alert{apaga} o conteúdo anterior!\\
+    \texttt{'a'} & escrita no final (\emph{append}), mantendo o conteúdo\\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \fonte{code/Cap6/prog.6.17\_tabela\_senos\_arquivo\_f.py}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{write} não acrescenta \texttt{\textbackslash n}}
+\begin{lstlisting}
+arq = open('saida.txt', 'w')
+arq.write('linha 1')
+arq.write('linha 2')        # saiu "linha 1linha 2" !
+arq.write('linha 3\n')      # \n explícito
+print('linha 4', file=arq)  # print grava com \n automático
+arq.close()
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{write} só aceita \alert{strings}: converta números com \texttt{str()} ou f-string
+    \item Esquecer de fechar (\texttt{close}) pode deixar dados sem gravar
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{O comando \texttt{with}}
+\begin{lstlisting}
+with open('nomes.txt', 'r') as arquivo:
+    for linha in arquivo:
+        print(linha.rstrip())
+# aqui o arquivo já foi fechado automaticamente
+
+with open('copia.txt', 'w') as saida:
+    with open('nomes.txt', 'r') as entrada:
+        for linha in entrada:
+            saida.write(linha)
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{with} fecha o arquivo \alert{sempre}, mesmo que ocorra um erro: é a forma recomendada
+    \item O segundo exemplo é o Exercício 6.14 (cópia de arquivo)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Arquivos que não existem}
+\begin{lstlisting}
+nome = input('Nome do arquivo: ')
+try:
+    with open(nome, 'r') as f:
+        conteudo = f.read()
+except FileNotFoundError:
+    print('Arquivo não encontrado:', nome)
+except PermissionError:
+    print('Sem permissão para ler', nome)
+else:
+    print(len(conteudo), 'caracteres lidos')
+\end{lstlisting}
+  \begin{itemize}
+    \item Combina o que vimos na Aula 13 (\texttt{try}/\texttt{except}) com arquivos
+    \item O caminho é relativo à pasta onde o programa \emph{executa} (não à do arquivo \texttt{.py})
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Exemplo: processando um arquivo de texto}
+  Converter o conteúdo de um arquivo para maiúsculas e gravar o resultado (Exercício 6.10):
+\begin{lstlisting}
+with open('nomes.txt', 'r') as entrada:
+    texto = entrada.read()
+with open('nomes_maiusculas.txt', 'w') as saida:
+    saida.write(texto.upper())
+\end{lstlisting}
+  \textbf{Variações (Exercícios 6.11 e 6.12):}
+  \begin{itemize}
+    \item \texttt{texto.lower()} para minúsculas
+    \item Primeira letra de cada palavra maiúscula: \texttt{texto.title()} ou processar \texttt{split()} palavra a palavra
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Dados em tabela: arquivos CSV}
+  CSV = \emph{Comma-Separated Values}: uma linha por registro, campos separados por vírgula.
+\begin{lstlisting}[style=saida]
+id_peca,maquina,operador,turno,tempo_ciclo_seg,status
+1000,M1,Ana,Noite,31.6,Aprovado
+1001,M1,Elis,Tarde,34.5,Aprovado
+1002,M2,Bruno,Noite,24.9,Descarte
+\end{lstlisting}
+\begin{lstlisting}
+import csv
+with open('dadosproducao.csv', newline='', encoding='utf-8') as f:
+    leitor = csv.DictReader(f)          # cada linha vira um dicionário
+    registros = list(leitor)
+print(registros[0]['maquina'], float(registros[0]['tempo_ciclo_seg']))
+\end{lstlisting}
+  \small Dica: \texttt{DictReader} + o que vimos de dicionários (Aula 20) resolve muitos problemas. O módulo \texttt{csv} cuida de aspas e vírgulas dentro dos campos.\\
+  \fonte{code/Projeto1/ler\_producao\_dict.py}
+\end{frame}
+
+\begin{frame}[fragile]{Gravando CSV}
+\begin{lstlisting}
+import csv
+ensaios = [(5.0, 0.25), (10.0, 0.52), (15.0, 0.76)]
+with open('ensaios.csv', 'w', newline='', encoding='utf-8') as f:
+    escritor = csv.writer(f)
+    escritor.writerow(['tensao_V', 'corrente_A'])
+    escritor.writerows(ensaios)
+\end{lstlisting}
+  \begin{itemize}
+    \item Todo programa de planilha (Excel, LibreOffice) abre CSV
+    \item Na parte final do curso, o \textbf{Pandas} lê CSV em uma única linha: \texttt{pd.read\_csv('ensaios.csv')}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Atividades}
+  \begin{enumerate}
+    \item Escreva um programa que leia \texttt{nomes.txt} e grave em outro arquivo os nomes em ordem alfabética, um por linha.
+    \item Leia um arquivo de notas (uma por linha) e escreva a média, a maior e a menor em um arquivo \texttt{resumo.txt}.
+    \item Grave em \texttt{tabela.txt} a tabela Celsius \(\to\) Fahrenheit de 0 a 100 de 10 em 10 (Exercício 6.13).
+    \item Leia \texttt{dadosproducao.csv} e conte quantas peças cada máquina produziu (dicionário de contagens, Aula 20).
+  \end{enumerate}
+\end{frame}
+
+\exercicios{6}{%
+  \begin{itemize}\small
+    \item Leitura: \textbf{6.10, 6.11, 6.12} (conversão de maiúsculas/minúsculas)
+    \item Escrita: \textbf{6.13} (tabela em arquivo), \textbf{6.14} (cópia de arquivo), \textbf{6.15} (pontos de \(\pi\) em arquivo)
+  \end{itemize}}
+
+\resumo{
+  \item \texttt{open(nome, modo)}: \texttt{'r'}, \texttt{'w'} (apaga!) e \texttt{'a'}
+  \item Arquivo de texto é percorrido linha a linha; \texttt{rstrip()} tira o \texttt{\textbackslash n}
+  \item \texttt{with} fecha o arquivo automaticamente; trate \texttt{FileNotFoundError}
+  \item CSV: use o módulo \texttt{csv} (ou Pandas, nas aulas finais)
+  \item Próxima aula: revisão, estilo e boas práticas
+}
+
+\end{document}

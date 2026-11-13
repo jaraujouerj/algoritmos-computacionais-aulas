@@ -1,0 +1,220 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{22}{Strings}{Manipulação de texto e formatação}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Strings: literais, aspas e caracteres especiais (Cap.~6.1)
+    \item Strings são sequências \alert{imutáveis}
+    \item Fatiando strings (6.2)
+    \item Operações e métodos sobre strings (6.3)
+    \item Formatação: \texttt{format} e f-strings
+    \item Aplicações: palíndromos e formatação de nomes
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Strings: aspas e caracteres especiais}
+\begin{lstlisting}
+ordem1 = '"Romanes\neunt\ndomus"?\n'
+ordem2 = "\'Romani ite domum\'"
+print(ordem1)
+print(ordem2)
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+"Romanes
+eunt
+domus"?
+
+'Romani ite domum'
+\end{lstlisting}
+  \small \texttt{\textbackslash n} nova linha; \texttt{\textbackslash t} tabulação; \texttt{\textbackslash\textbackslash} barra; \texttt{\textbackslash'} e \texttt{\textbackslash"} aspas. Aspas simples ou duplas são equivalentes: use uma para poder escrever a outra dentro.\\
+  \fonte{code/Cap6/prog.6.01\_romani.py}
+\end{frame}
+
+\begin{frame}[fragile]{Aspas triplas: textos longos}
+\begin{lstlisting}
+ordem = '''Romanes eunt domus?
+"Romani ite domum"'''
+print(ordem)
+\end{lstlisting}
+  \begin{itemize}
+    \item Triplas aspas (\texttt{'''} ou \texttt{"""}) aceitam \alert{várias linhas} e aspas dentro
+    \item São também usadas nas \emph{docstrings} das funções (Aula 10)
+    \item Para ``quebrar'' uma string longa no código, a barra invertida \texttt{\textbackslash} no fim da linha continua o texto
+  \end{itemize}
+  \fonte{code/Cap6/prog.6.02\_celacanto.py, 6.03\_aspastriplas.py}
+\end{frame}
+
+\begin{frame}[fragile]{Strings são sequências}
+\begin{lstlisting}
+frase = 'Celacanto'
+print(len(frase))          # 9
+print(frase[0], frase[-1]) # C o
+for letra in frase:
+    print(letra)
+for i in range(len(frase)):
+    print(i, frase[i])
+print('a' in frase)        # True
+print('can' in frase)      # True (subcadeia)
+\end{lstlisting}
+  \begin{itemize}
+    \item A \emph{leitura} funciona como nas listas: índices, \texttt{len}, \texttt{for}, \texttt{in} (que procura \emph{subcadeias}). Comandos que \emph{modificam} (\texttt{append}, \texttt{sort}, \ldots) não existem em strings: Exercício 6.2
+  \end{itemize}
+  \fonte{code/Cap6/prog.6.04\_percorrer\_string.py, 6.05\_percorrer\_string\_com\_range.py}
+\end{frame}
+
+\begin{frame}[fragile]{Strings são imutáveis}
+\begin{lstlisting}
+frase = 'Romani'
+frase[1] = 'o'          # TypeError: 'str' object does not support
+                        # item assignment
+\end{lstlisting}
+  \textbf{Solução:} construir uma \emph{nova} string
+\begin{lstlisting}
+frase = 'Romani'
+frase = frase[:-2] + 'o'
+print(frase)            # Romao
+frase = frase.replace('o', 'O')   # também devolve nova string
+\end{lstlisting}
+  \begin{alertblock}{Lembre da Aula 18}
+    Strings (e números, tuplas) são imutáveis: passá-las a uma função nunca as altera. Veja \texttt{code/Cap6/prog.6.08\_passagem\_listas\_strings.py}.
+  \end{alertblock}
+  \fonte{code/Cap6/prog.6.06\_string\_imutavel.py, 6.07\_string\_imutavel1.py}
+\end{frame}
+
+\begin{frame}[fragile]{Fatiando strings}
+\begin{lstlisting}
+frase = 'Romani ite domum'
+print(frase[7:10])     # ite
+print(frase[:6])       # Romani
+print(frase[7:])       # ite domum
+print(frase[7:-1])     # ite domu
+print(frase[:])        # Romani ite domum
+print(frase[::-1])     # mumod eti inamoR
+\end{lstlisting}
+  \begin{itemize}
+    \item Mesma regra das listas: \texttt{s[ini:fim:passo]}, com \texttt{fim} exclusivo
+    \item \texttt{s[::-1]} inverte a string (Exercício 6.4)
+  \end{itemize}
+  \fonte{code/Cap6/prog.6.09\_fatia\_string.py}
+\end{frame}
+
+\begin{frame}[fragile]{Métodos de string}
+\begin{lstlisting}
+s = '  Python é Divertido!  '
+print(s.upper())            # '  PYTHON É DIVERTIDO!  '
+print(s.lower())            # minúsculas
+print(s.strip())            # remove espaços das pontas
+print(s.strip().title())    # 'Python É Divertido!'
+print(s.replace('Python', 'Java'))
+print(s.count('i'))         # 2
+print(s.find('é'))          # posição (ou -1 se não achar)
+print(s.strip().startswith('Py'), s.strip().endswith('!'))
+print('42'.isdigit(), 'abc'.isalpha())
+\end{lstlisting}
+  \small Métodos de string \alert{sempre devolvem uma nova string} (a original não muda).
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{split} e \texttt{join}}
+\begin{lstlisting}
+nome = 'João Araujo Ribeiro'
+lista = nome.split(' ')
+print(lista)                       # ['João', 'Araujo', 'Ribeiro']
+nome_formatado = lista[-1] + ', ' + lista[1][0] + '. ' + lista[0]
+print(nome_formatado)              # Ribeiro, A. João
+
+dados = '21.3;22.1;23.4'
+valores = [float(x) for x in dados.split(';')]
+print(valores)                     # [21.3, 22.1, 23.4]
+print(' - '.join(['a', 'b', 'c'])) # a - b - c
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{split(sep)}: string \(\to\) lista; \texttt{sep.join(lista)}: lista \(\to\) string
+    \item Exercícios 6.8 e 6.9: nomes com mais ou menos de três partes
+  \end{itemize}
+  \fonte{code/Cap6/prog.6.10\_formata\_nome.py, 6.11\_formata\_nomealt.py}
+\end{frame}
+
+\begin{frame}[fragile]{Formatação de strings}
+\begin{lstlisting}
+nome, nota = 'Ana', 8.456
+print('Aluno {} tirou {:.1f}'.format(nome, nota))
+print(f'Aluno {nome} tirou {nota:.1f}')          # f-string
+print(f'{nome:>10}|{nota:<8.2f}|{42:05d}')       # alinhamento e zeros
+print(f'{0.256:.1%}  {1234567:,}')                # 25.6%  1,234,567
+print(f'{"Graus":>9}{"Seno":>9}')
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+Aluno Ana tirou 8.5
+Aluno Ana tirou 8.5
+       Ana|8.46    |00042
+25.6%  1,234,567
+    Graus     Seno
+\end{lstlisting}
+  \small \texttt{>} direita, \texttt{<} esquerda, \texttt{\^} centro; \texttt{.2f} duas casas; \texttt{d} inteiro.\\
+  \fonte{code/Cap4/prog.4.a\_exemplos\_format.py}
+\end{frame}
+
+\begin{frame}[fragile]{Aplicação: palíndromos}
+  Uma palavra é palíndromo se é igual lida de trás para a frente (\emph{ovo}, \emph{arara}, \emph{radar}).
+\begin{lstlisting}
+def palindromo(palavra):
+    return palavra == palavra[::-1]
+
+print(palindromo('ovo'))       # True
+print(palindromo('Ovo'))       # False  <- diferencia maiúsculas!
+\end{lstlisting}
+  \textbf{Exercícios 6.5 a 6.7:} outras formas de testar; ignorar maiúsculas com \texttt{lower()}; frases inteiras (``A sogra má te dá amor, Mateus, e ama o tema do Mateus''). Dicas para frases: remover espaços e pontuação, eliminar acentos.
+  \fonte{code/Cap6/prog.6.a\_palindromo.py}
+\end{frame}
+
+\begin{frame}[fragile]{Palíndromo em frases}
+\begin{lstlisting}
+def palindromo_frase(frase):
+    """Diz se a frase é palíndromo, ignorando espaços e maiúsculas."""
+    s = frase.lower().replace(' ', '')
+    return s == s[::-1]
+
+print(palindromo_frase('Socorram me subi no onibus em Marrocos'))
+\end{lstlisting}
+  \begin{itemize}
+    \item Passo a passo: \texttt{lower()} \(\to\) \texttt{replace(' ', '')} \(\to\) comparar com o inverso
+    \item Acentos e pontuação exigem tratamento extra: um bom \emph{caso-limite} para testar
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Contando espaços e palavras (Exercício 6.3)}
+\begin{lstlisting}
+texto = input('Digite uma frase: ')
+espacos = 0
+for c in texto:
+    if c == ' ':
+        espacos += 1
+print('Espaços:', espacos)
+print('Também:', texto.count(' '))
+print('Palavras:', len(texto.split()))
+\end{lstlisting}
+  \begin{itemize}
+    \item Compare a solução manual (\texttt{for}) com o método pronto (\texttt{count})
+    \item \texttt{split()} sem argumento separa por \emph{qualquer} quantidade de espaços
+  \end{itemize}
+\end{frame}
+
+\exercicios{6}{%
+  \begin{itemize}\small
+    \item Strings: \textbf{6.1} (Romani ite domum), \textbf{6.2} (o que das listas funciona em strings), \textbf{6.3} (contando espaços)
+    \item Fatiamento: \textbf{6.4} (string invertida), \textbf{6.5, 6.6, 6.7} (palíndromos)
+    \item Operações: \textbf{6.8, 6.9} (nome composto)
+  \end{itemize}}
+
+\resumo{
+  \item String é uma sequência \emph{imutável} de caracteres: índices, fatias, \texttt{len}, \texttt{in}
+  \item Métodos: \texttt{upper}, \texttt{lower}, \texttt{strip}, \texttt{replace}, \texttt{find}, \texttt{split}, \texttt{join}\ldots
+  \item Formatação com f-strings: \texttt{f'\{x:.2f\}'}
+  \item Próxima aula: arquivos
+}
+
+\end{document}

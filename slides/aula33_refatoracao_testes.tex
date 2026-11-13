@@ -1,0 +1,255 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{33}{Refatoração e Testes}{Legibilidade, organização, robustez e boas práticas}
+
+\begin{document}
+\capa
+
+\begin{frame}{Objetivos da aula}
+  \begin{itemize}
+    \item \textbf{Refatorar}: melhorar a legibilidade, a organização e a eficiência \emph{sem mudar o comportamento}
+    \item \textbf{Testar} casos extremos para garantir a robustez
+    \item Aplicar boas práticas: nomes, coesão, modularização e separação de responsabilidades
+    \item Receber feedback detalhado sobre as melhorias e ajustes finais
+  \end{itemize}
+  \begin{exampleblock}{Cap.~9 em ação}
+    Preocupe-se com seu leitor; seja simples; seja desapegado; teste seu programa.
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{O que é refatorar?}
+  \begin{columns}[T]
+    \column{0.52\textwidth}
+    \begin{itemize}
+      \item Reorganizar o código \textbf{sem alterar o que ele faz}
+      \item Como garantir isso? \alert{Com testes}: rode-os antes e depois
+      \item Faça mudanças \emph{pequenas}, uma por vez
+    \end{itemize}
+    \column{0.45\textwidth}
+    \begin{block}{Fluxo seguro}
+      \begin{enumerate}\small
+        \item Garanta que os testes passam
+        \item Faça \emph{uma} melhoria
+        \item Rode os testes de novo
+        \item Repita
+      \end{enumerate}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Sinais de que é hora de refatorar}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{itemize}
+      \item Funções com \(>\) 30 linhas ou que fazem várias coisas
+      \item Código \textbf{repetido} (copiar e colar)
+      \item Nomes como \texttt{x}, \texttt{aux}, \texttt{dados2}
+      \item Muitos níveis de \texttt{if}/\texttt{for} aninhados
+    \end{itemize}
+    \column{0.5\textwidth}
+    \begin{itemize}
+      \item Números ``mágicos'' soltos no código
+      \item Variáveis globais modificadas em várias funções
+      \item Comentários explicando código confuso
+      \item Funções que leem do teclado \emph{e} calculam
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Antes e depois: nomes e números mágicos}
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+    \textbf{Antes}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+def f(d):
+    t = 0
+    for k in d:
+        t = t + d[k][1] * d[k][2]
+    if t > 5000:
+        t = t * 0.95
+    return t
+\end{lstlisting}
+    \column{0.5\textwidth}
+    \textbf{Depois}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+LIMITE_DESCONTO = 5000.0
+FATOR_DESCONTO = 0.95
+
+def custo_total(estoque):
+    """Custo do estoque, com desconto
+    para compras acima do limite."""
+    total = sum(item["preco"] * item["qtd"]
+                for item in estoque.values())
+    if total > LIMITE_DESCONTO:
+        total *= FATOR_DESCONTO
+    return total
+\end{lstlisting}
+  \end{columns}
+  \vspace{1ex}
+  \small Nomes que explicam, constantes nomeadas (Aula 5), docstring, compreensão no lugar de laço manual.
+\end{frame}
+
+\begin{frame}[fragile]{Antes e depois: eliminar repetição}
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+    \textbf{Antes}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+p = float(input("Preço: "))
+while p < 0:
+    p = float(input("Preço: "))
+q = float(input("Quantidade: "))
+while q < 0:
+    q = float(input("Quantidade: "))
+m = float(input("Mínimo: "))
+while m < 0:
+    m = float(input("Mínimo: "))
+\end{lstlisting}
+    \column{0.5\textwidth}
+    \textbf{Depois}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+def le_nao_negativo(msg):
+    while True:
+        try:
+            v = float(input(msg))
+            if v >= 0:
+                return v
+        except ValueError:
+            pass
+        print("Valor inválido.")
+
+preco = le_nao_negativo("Preço: ")
+qtd = le_nao_negativo("Quantidade: ")
+minimo = le_nao_negativo("Mínimo: ")
+\end{lstlisting}
+  \end{columns}
+  \small \textbf{DRY} (\emph{don't repeat yourself}): se você copiou e colou, provavelmente falta uma função.
+\end{frame}
+
+\begin{frame}{Separação de responsabilidades}
+  \centering
+  \begin{tikzpicture}[caixa/.style={draw=uerjazul,fill=uerjcinza,rounded corners,minimum width=3.2cm,minimum height=1cm,align=center,font=\small},
+      seta/.style={-{Stealth},thick,uerjazul}]
+    \node[caixa] (io) at (0,0) {Interface\\\scriptsize menu, \texttt{input}, \texttt{print}};
+    \node[caixa] (reg) at (4.5,0) {Regras\\\scriptsize cálculos, validações};
+    \node[caixa] (dad) at (9,0) {Dados\\\scriptsize arquivos, CSV};
+    \draw[seta,<->] (io)--(reg);
+    \draw[seta,<->] (reg)--(dad);
+  \end{tikzpicture}
+  \vspace{1ex}
+
+  \begin{itemize}\small
+    \item \textbf{Regras} não deveriam usar \texttt{input}/\texttt{print}: recebem parâmetros e devolvem valores
+    \item \textbf{Interface} não deveria calcular: chama as regras
+    \item \textbf{Dados} sabem ler e gravar; não sabem o que significam os números
+    \item Resultado: cada parte é testável e substituível
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Testes automáticos com \texttt{assert}}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+# testes.py
+from estoque import custo_total, baixa_estoque, insumos_em_alerta
+
+def novo():
+    return {"cimento": {"unidade": "saco", "preco": 10.0, "qtd": 5, "minimo": 3}}
+
+def teste_custo_total():
+    assert custo_total(novo()) == 50.0
+    assert custo_total({}) == 0.0                 # caso-limite: vazio
+
+def teste_baixa():
+    e = novo()
+    baixa_estoque(e, "cimento", 2)
+    assert e["cimento"]["qtd"] == 3
+    assert insumos_em_alerta(e) == ["cimento"]    # qtd == minimo
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Executando os testes}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+def teste_baixa_insuficiente():
+    try:
+        baixa_estoque(novo(), "cimento", 99)
+        assert False, "deveria levantar ValueError"
+    except ValueError:
+        pass
+
+if __name__ == "__main__":
+    teste_custo_total()
+    teste_baixa()
+    teste_baixa_insuficiente()
+    print("Todos os testes passaram!")
+\end{lstlisting}
+  \begin{itemize}\small
+    \item Rode \texttt{python testes.py} após \alert{cada} alteração
+    \item Para projetos maiores, existem \texttt{unittest} (biblioteca padrão) e \texttt{pytest} (\texttt{pip install pytest}): descobrem e executam todas as funções \texttt{test\_*} e mostram relatório
+    \item Testes escritos viram a \textbf{rede de segurança} das refatorações
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Casos extremos: o que testar?}
+  \centering\small
+  \begin{tabular}{p{3.4cm}p{8.4cm}}
+    \toprule
+    \textbf{Tipo} & \textbf{Exemplos}\\
+    \midrule
+    Vazio & lista/dicionário/arquivo vazio; texto sem nada\\
+    Limites & zero, um, o menor e o maior valor permitido, igual ao mínimo\\
+    Inválidos & texto onde se espera número; número negativo; opção inexistente\\
+    Tamanho & um só elemento; milhares de linhas\\
+    Repetição & item duplicado; cadastrar duas vezes o mesmo nome\\
+    Arquivos & inexistente; sem permissão; linha incompleta; acentos\\
+    Numéricos & divisão por zero; arredondamento de \texttt{float}\\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\begin{frame}{Ferramentas de qualidade}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{block}{Estilo (Aula 24)}
+      \texttt{pylint programa.py}\\
+      \texttt{yapf -i programa.py}\\
+      \texttt{black programa.py}
+    \end{block}
+    \column{0.5\textwidth}
+    \begin{block}{Revisão}
+      \begin{itemize}\small
+        \item Leia o código do colega \emph{como um estranho}
+        \item Pergunte: dá para entender sem explicação?
+        \item Troque de lugar: um integrante tenta rodar o programa do outro
+      \end{itemize}
+    \end{block}
+  \end{columns}
+  \vspace{1ex}
+  \begin{alertblock}{Código ruim se apaga}
+    Se um trecho está cada vez mais remendado, reescreva-o do zero (Cap.~9.4), agora que você conhece o problema.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{Atividade: sessão de refatoração e testes}
+  \begin{enumerate}
+    \item Escrevam \textbf{pelo menos 5 testes automáticos} das funções de regra (inclua 2 casos-limite)
+    \item Passem o \texttt{pylint} (ou \texttt{yapf}) no código e tratem os principais avisos
+    \item Procurem e eliminem \textbf{código repetido}
+    \item Renomeiem variáveis e funções pouco claras; acrescentem \textbf{docstrings}
+    \item Verifiquem que nenhuma função de regra usa \texttt{input}/\texttt{print}
+    \item Mostrem ao professor: o que mudou? Os testes continuam passando?
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Checklist final antes da apresentação}
+  \small
+  \begin{tabular}{@{}cl@{}}
+    $\square$ & O programa roda do zero com um único comando (e há instruções de uso)?\\
+    $\square$ & Existem testes e todos passam?\\
+    $\square$ & Nenhuma função tem mais de ~30 linhas ou faz várias coisas?\\
+    $\square$ & Não há código repetido, números mágicos nem variáveis globais mutáveis?\\
+    $\square$ & Entradas inválidas e erros de arquivo não derrubam o programa?\\
+    $\square$ & Nomes, docstrings e comentários estão claros?\\
+    $\square$ & Os dados de exemplo e os arquivos necessários estão na pasta do projeto?\\
+    $\square$ & Cada integrante consegue explicar qualquer parte do código?\\
+  \end{tabular}
+\end{frame}
+
+\end{document}

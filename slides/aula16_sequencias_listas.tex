@@ -1,0 +1,188 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{16}{Estruturas de Dados I}{Sequências e listas}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item O problema: guardar muitos valores (Cap.~5.1)
+    \item Listas em Python: criação, índices, \texttt{len} (5.2)
+    \item Percorrendo uma lista: \texttt{for}, \texttt{range(len())}, \texttt{enumerate}
+    \item Listas são \alert{mutáveis}
+    \item Lendo dados e construindo listas com \texttt{append}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{O problema: muitas variáveis}
+\begin{lstlisting}
+nota1 = 7; nota2 = 8; nota3 = 10; nota4 = 9
+media = (nota1 + nota2 + nota3 + nota4) / 4
+\end{lstlisting}
+  \begin{itemize}
+    \item E se a turma tiver 40 alunos? E 4\,000 medições de um sensor?
+    \item Precisamos de uma \textbf{sequência}: uma coleção \emph{ordenada} de valores acessíveis por posição
+    \item Em Python: \texttt{list}, \texttt{tuple}, \texttt{str} (texto é uma sequência de caracteres), \texttt{range}
+  \end{itemize}
+  \begin{exampleblock}{Hoje}
+    A \textbf{lista}: a estrutura de dados mais usada em Python.
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}[fragile]{Criando e acessando listas}
+\begin{lstlisting}
+notas = [7, 8, 10, 9]
+print(notas[0])        # 7  (o primeiro índice é 0)
+print(notas[3])        # 9
+print(notas[-1])       # 9  (índice negativo: a partir do fim)
+print(len(notas))      # 4
+soma = notas[0] + notas[1] + notas[2] + notas[3]
+print("A média é igual a ", soma / 4)
+\end{lstlisting}
+  \begin{center}\small
+    \begin{tabular}{c|c|c|c|c}
+      \multicolumn{1}{r}{índice} & 0 & 1 & 2 & 3\\
+      \multicolumn{1}{r}{negativo} & -4 & -3 & -2 & -1\\\hline
+      \texttt{notas} & 7 & 8 & 10 & 9\\
+    \end{tabular}
+  \end{center}
+  \fonte{code/Cap5/prog.5.1\_notas.py}
+\end{frame}
+
+\begin{frame}[fragile]{Percorrendo uma lista}
+  \textbf{Direto pelos elementos} (mais simples):
+\begin{lstlisting}
+notas = [7, 8, 10, 9]
+soma = 0
+for nota in notas:
+    soma += nota
+print("A média é igual a ", soma / len(notas))
+\end{lstlisting}
+  \textbf{Pelos índices} (quando precisa da posição):
+\begin{lstlisting}
+soma = 0
+for i in range(len(notas)):
+    soma = soma + notas[i]
+\end{lstlisting}
+  \fonte{code/Cap5/prog.5.5\_notas\_com\_lista.py, 5.2\_notas\_com\_range.py}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{enumerate}: índice e valor juntos}
+\begin{lstlisting}
+dias_da_semana = ['Domingo', 'Segunda-feira', 'Terça-feira',
+    'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado']
+for i, dia in enumerate(dias_da_semana, 1):
+    print('O dia', i, 'é', dia)
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+O dia 1 é Domingo
+O dia 2 é Segunda-feira
+...
+\end{lstlisting}
+  \small O segundo argumento de \texttt{enumerate} é o valor inicial da contagem.\\
+  \fonte{code/Cap5/prog.5.a\_dias\_enumerate.py}
+\end{frame}
+
+\begin{frame}[fragile]{Listas são mutáveis}
+\begin{lstlisting}
+notas = [7, 8.1, 10, 9]
+print(notas)           # [7, 8.1, 10, 9]
+notas[3] = 6
+print(notas)           # [7, 8.1, 10, 6]
+\end{lstlisting}
+  \begin{itemize}
+    \item Pode-se \alert{alterar} um elemento no lugar; o tamanho continua igual
+    \item Diferente de strings e tuplas (\textbf{imutáveis}), que veremos adiante
+    \item Listas aceitam tipos \emph{misturados}: \texttt{['Ana', 21, 8.5, True]}
+    \item Índice fora do intervalo \(\Rightarrow\) \texttt{IndexError}
+  \end{itemize}
+  \fonte{code/Cap5/prog.5.6\_lista\_mutavel.py}
+\end{frame}
+
+\begin{frame}[fragile]{Dobrando todos os valores}
+\begin{lstlisting}
+lista = [1, 2, 3, 5, 7]
+for i in range(len(lista)):
+    lista[i] *= 2
+print(lista)           # [2, 4, 6, 10, 14]
+\end{lstlisting}
+  \begin{alertblock}{Pegadinha}
+    \texttt{for i in lista: i *= 2} \alert{não} altera a lista! A variável \texttt{i} é só uma cópia do valor. Para modificar os elementos é preciso usar o \emph{índice}.
+  \end{alertblock}
+  \begin{itemize}
+    \item Alternativa elegante: \texttt{for i, item in enumerate(lista): lista[i] = item * 2}
+  \end{itemize}
+  \fonte{code/Cap5/prog.5.9\_dobra\_lista2.py, 5.10\_duplica\_enumerate.py}
+\end{frame}
+
+\begin{frame}[fragile]{Construindo listas com \texttt{append}}
+\begin{lstlisting}
+numeros = []                 # lista vazia
+for i in range(10):
+    n = int(input('Digite um número:'))
+    numeros.append(n)        # acrescenta ao final
+print('A lista criada é:', numeros)
+\end{lstlisting}
+  \begin{itemize}
+    \item Padrão mais comum: começar com \texttt{[]} e acrescentar valores
+    \item Útil quando não se sabe o tamanho de antemão (leitura de dados, resultados de cálculos)
+  \end{itemize}
+  \fonte{code/Cap5/prog.5.26\_listas\_append.py}
+\end{frame}
+
+\begin{frame}[fragile]{Exemplo: temperaturas em Celsius (Exercício 5.1)}
+\begin{lstlisting}
+celsius = [22.5, 25.0, 19.8, 30.1, 27.4]
+fahrenheit = []
+for c in celsius:
+    fahrenheit.append(9 / 5 * c + 32)
+
+for c, f in zip(celsius, fahrenheit):
+    print(f"{c:6.1f} C = {f:6.1f} F")
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{zip} percorre duas listas em paralelo
+    \item Todos os dados na mesma estrutura; uma só função poderia processá-los
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Funções úteis para listas de números}
+\begin{lstlisting}
+notas = [7, 8, 10, 9, 5.5]
+print(len(notas))                  # 5
+print(sum(notas))                  # 39.5
+print(min(notas), max(notas))      # 5.5 10
+print(sum(notas) / len(notas))     # 7.9
+print(sorted(notas))               # [5.5, 7, 8, 9, 10]
+print(7 in notas, 3 in notas)      # True False
+\end{lstlisting}
+  \begin{itemize}
+    \item Já resolvemos o ``Problema 4'' da Aula 9 (dias acima da média): agora é só percorrer a lista com um contador
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Atividades}
+  \begin{enumerate}
+    \item Leia 5 temperaturas e mostre a média, a maior, a menor e quantas ficaram acima da média.
+    \item Dada a lista de notas de uma turma, calcule a nota média e liste os índices dos alunos abaixo de 5.
+    \item Escreva uma função \texttt{media(lista)} que devolve a média (e trate a lista vazia).
+    \item Reescreva o programa de Fahrenheit (Exercício 5.2) imprimindo a tabela do \textbf{último} para o primeiro valor.
+  \end{enumerate}
+\end{frame}
+
+\exercicios{5}{%
+  \begin{itemize}\small
+    \item Processando uma lista: \textbf{5.1} (temperaturas), \textbf{5.2} (Fahrenheit invertido), \textbf{5.3} (com \texttt{try}/\texttt{except})
+    \item \textbf{5.4} (\texttt{while}), \textbf{5.5} (ímpares para pares), \textbf{5.6} (tabela de \(\pi\))
+  \end{itemize}}
+
+\resumo{
+  \item Lista = sequência ordenada e mutável; índices a partir de 0 (e negativos a partir do fim)
+  \item \texttt{len}, \texttt{sum}, \texttt{min}, \texttt{max}, \texttt{in}
+  \item Percorra por elementos, por índices ou com \texttt{enumerate}
+  \item Para alterar elementos, use o índice
+  \item Próxima aula: fatiamento, compreensão de listas e métodos
+}
+
+\end{document}

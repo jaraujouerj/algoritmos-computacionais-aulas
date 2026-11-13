@@ -1,0 +1,252 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{21}{NumPy}{Vetores, operações vetorizadas e aplicações numéricas}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Por que NumPy? Listas \emph{versus} arrays (Cap.~5.14)
+    \item Criando arrays: \texttt{array}, \texttt{arange}, \texttt{linspace}, \texttt{zeros}, \texttt{ones}
+    \item Operações vetorizadas e funções universais
+    \item Indexação, fatiamento e filtros booleanos
+    \item Matrizes, eixos (\texttt{axis}) e álgebra linear
+    \item Armadilhas: homogeneidade e visões de memória
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Por que NumPy?}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{block}{Listas do Python}
+      \begin{itemize}\small
+        \item Flexíveis (tipos misturados)
+        \item \texttt{+} concatena, \texttt{*} repete
+        \item Cálculos exigem \emph{laços} \(\Rightarrow\) lentos
+      \end{itemize}
+    \end{block}
+    \column{0.5\textwidth}
+    \begin{exampleblock}{Arrays do NumPy}
+      \begin{itemize}\small
+        \item Elementos de \textbf{um só tipo}
+        \item Operações aplicadas elemento a elemento
+        \item Código em C por baixo: \alert{muito} mais rápido
+      \end{itemize}
+    \end{exampleblock}
+  \end{columns}
+  \vspace{1ex}
+  É a base da computação científica em Python: \textbf{Pandas}, \textbf{Matplotlib}, SciPy e \emph{machine learning} são construídos sobre NumPy.
+\end{frame}
+
+\begin{frame}[fragile]{Concatenar \emph{versus} somar}
+\begin{lstlisting}
+import numpy as np
+
+a = [1, 2, 3]
+b = [4, 5, 6]
+c = a + b
+print(c)               # [1, 2, 3, 4, 5, 6]   concatenação
+
+a_num = np.array(a)
+b_num = np.array(b)
+c_num = a_num + b_num
+print(c_num)           # [5 7 9]              soma vetorial
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{import numpy as np}: apelido universal
+    \item Com arrays, \texttt{+}, \texttt{-}, \texttt{*}, \texttt{/}, \texttt{**} atuam \alert{elemento a elemento}
+  \end{itemize}
+  \fonte{code/Cap5/prog.5.h\_algebralinear.py}
+\end{frame}
+
+\begin{frame}[fragile]{Criando arrays}
+\begin{lstlisting}
+import numpy as np
+a = np.array([1, 2, 3])                # de uma lista
+print(np.arange(0, 1, 0.25))           # [0.   0.25 0.5  0.75]
+print(np.linspace(0, 1, 5))            # [0.   0.25 0.5  0.75 1.  ]
+print(np.zeros(3))                     # [0. 0. 0.]
+print(np.ones((2, 3)))                 # matriz 2 x 3 de uns
+print(np.eye(2))                       # identidade 2 x 2
+print(a.shape, a.dtype, a.size)        # (3,) int64 3
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{arange(ini, fim, passo)}: como \texttt{range}, mas aceita passo \emph{real}
+    \item \texttt{linspace(ini, fim, n)}: \(n\) pontos igualmente espaçados, \alert{incluindo} o fim
+    \item \texttt{shape} = dimensões; \texttt{dtype} = tipo dos elementos
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Operações vetorizadas}
+\begin{lstlisting}
+a = np.array([1, 2, 3, 4])
+print(a * 2)            # [2 4 6 8]
+print(a ** 2)           # [ 1  4  9 16]
+print(a + 10)           # [11 12 13 14]
+print(1 / a)            # [1.  0.5  0.333...  0.25]
+print(np.sqrt(a))       # [1.  1.41421356 1.73205081 2.]
+x = np.linspace(0, np.pi, 5)
+print(np.sin(x).round(3))    # [0.    0.707 1.    0.707 0.   ]
+\end{lstlisting}
+  \begin{itemize}
+    \item Sem laço \texttt{for}: o código fica curto, claro e rápido
+    \item \textbf{Funções universais} (\texttt{ufuncs}): \texttt{sin}, \texttt{cos}, \texttt{exp}, \texttt{log}, \texttt{sqrt}\ldots
+    \item Uma tabela de senos (Aula 12) agora são duas linhas
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Velocidade: lista \emph{versus} array}
+\begin{lstlisting}
+import numpy as np, random, time
+num = 10_000_000
+lista1 = random.choices(range(1, 10001), k=num)
+lista2 = random.choices(range(1, 10001), k=num)
+
+t1 = time.time()
+lista3 = [lista1[i] * lista2[i] for i in range(num)]
+print('Lista:', time.time() - t1)
+
+l1, l2 = np.array(lista1), np.array(lista2)
+t1 = time.time()
+l3 = l1 * l2
+print('NumPy:', time.time() - t1)
+\end{lstlisting}
+  \small Em geral o NumPy é dezenas de vezes mais rápido (confira na sua máquina!).\\
+  \fonte{code/Cap5/prog.5.i\_compara\_listas\_e\_arrays.py}
+\end{frame}
+
+\begin{frame}[fragile]{Estatística e agregações}
+\begin{lstlisting}
+notas = np.array([5, 9, 5.5, 10, 8])
+print(notas.sum(), notas.mean())       # 37.5  7.5
+print(notas.min(), notas.max())        # 5.0  10.0
+print(notas.std(), np.median(notas))   # desvio-padrão, mediana
+print(notas.argmax())                  # 3 (posição do maior)
+print(np.sort(notas))                  # [ 5.   5.5  8.   9.  10. ]
+\end{lstlisting}
+  \textbf{Média ponderada} (álgebra linear em uma linha):
+\begin{lstlisting}
+pesos = np.array([1, 2, 4, 1, 2])
+print(np.sum(notas * pesos) / np.sum(pesos))   # 7.1
+print(np.average(notas, weights=pesos))        # 7.1
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Indexação e filtros booleanos}
+\begin{lstlisting}
+import numpy as np
+	
+notas = np.array([5, 9, 5.5, 10, 8.4])
+print(notas > 6)                   # [False  True False  True  True]
+print('Notas > 6:', notas[notas > 6])      # [ 9.  10.   8.4]
+print('Notas <= 6:', notas[notas <= 6])    # [5.  5.5]
+print(((notas > 6) & (notas < 10)).sum())  # entre 6 e 10: 2
+notas[notas < 5.5] = 5.5           # altera somente os que satisfazem
+\end{lstlisting}
+  \begin{itemize}
+    \item Uma \textbf{máscara booleana} dentro dos colchetes seleciona elementos
+    \item Combine com \texttt{\&} (e), \texttt{|} (ou), \texttt{\textasciitilde} (não), \alert{com parênteses}
+    \item É a base de filtros em Pandas (Aula 28)
+  \end{itemize}
+  \fonte{code/Cap5/prog.5.g\_numpy\_turma.boolean.py}
+\end{frame}
+
+\begin{frame}[fragile]{Matrizes: \texttt{shape}, fatias e eixos}
+\begin{lstlisting}
+import numpy as np
+	
+m = np.array([[1, 2, 3],
+              [4, 5, 6]])
+print(m.shape)            # (2, 3)
+print(m[1, 2])            # 6        (linha 1, coluna 2)
+print(m[:, 0])            # [1 4]    (coluna 0)
+print(m[0, :])            # [1 2 3]  (linha 0)
+print(m.sum(axis=0))      # [5 7 9]  (soma de cada COLUNA)
+print(m.sum(axis=1))      # [ 6 15]  (soma de cada LINHA)
+print(m.T)                # transposta
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{m[i, j]} em vez de \texttt{m[i][j]}
+    \item \texttt{axis=0} colapsa as \emph{linhas}; \texttt{axis=1}, as \emph{colunas}
+  \end{itemize}
+  \fonte{code/Cap5/prog.5.f\_numpy\_com\_axis.py}
+\end{frame}
+
+\begin{frame}[fragile]{Álgebra linear com NumPy}
+  Resolver o sistema \(\begin{cases}2x + y = 3\\ x + 3y = 5\end{cases}\):
+\begin{lstlisting}
+A = np.array([[2, 1],
+              [1, 3]])
+b = np.array([3, 5])
+x = np.linalg.solve(A, b)
+print(x)                  # [0.8 1.4]
+print(A @ x)              # [3. 5.]   (produto matricial; confere!)
+print(np.linalg.det(A))   # 5.0 (aprox.)
+print(np.linalg.inv(A))   # matriz inversa
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{*} é elemento a elemento; \texttt{@} é produto \textbf{matricial}
+    \item Aplicações: circuitos (leis de Kirchhoff), estruturas, balanços de massa
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Aplicação: ajuste de reta (dados experimentais)}
+\begin{lstlisting}
+V = np.array([5.0, 10.0, 15.0, 20.0])     # tensão (V)
+I = np.array([0.25, 0.52, 0.76, 1.01])    # corrente (A)
+
+a, b = np.polyfit(V, I, 1)                # reta I = a V + b
+print(f"I = {a:.4f} V + {b:.4f}")   # I = 0.0504 V + 0.0050
+R = 1 / a
+print(f"Resistência estimada: {R:.2f} ohms")   # 19.84
+\end{lstlisting}
+  \begin{itemize}
+    \item A mesma tabela de ensaios da Aula 19, agora com análise numérica de verdade
+    \item Na Aula 27 vamos \alert{plotar} os pontos e a reta com Matplotlib
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Armadilhas do NumPy}
+  \textbf{1. Homogeneidade:} todos os elementos têm um tipo.
+\begin{lstlisting}
+print(np.array(['Python', 1, 2, 3]))   # ['Python' '1' '2' '3']  (tudo vira texto!)
+\end{lstlisting}
+  \textbf{2. Fatias são \emph{visões}, não cópias:}
+\begin{lstlisting}
+import numpy as np
+
+a = [1, 2, 3, 4, 5];            b = a[1:];  b[0] = 42   # lista: a NÃO muda
+a = np.array([1, 2, 3, 4, 5]);  b = a[1:];  b[0] = 42   # array: a MUDA!
+print(a)                         # [ 1 42  3  4  5]
+b = a[1:].copy()                 # para copiar de verdade
+\end{lstlisting}
+  \fonte{code/Cap5/prog.5.43\_numpy\_erros.py}
+\end{frame}
+
+\begin{frame}{Atividade}
+  \begin{enumerate}
+    \item Crie um array com 100 pontos de \(0\) a \(2\pi\) e calcule \(\sin\) e \(\cos\); verifique que \(\sin^2+\cos^2=1\) para todos os pontos.
+    \item Dado o array de temperaturas de 24 horas, calcule média, máxima, hora da máxima, e quantas horas ficaram acima da média.
+    \item Resolva o circuito de duas malhas (sistema \(3\times3\)) com \texttt{np.linalg.solve}.
+    \item Reescreva, com NumPy, o programa Monte Carlo para estimar \(\pi\) sem nenhum laço \texttt{for}:\\
+          \texttt{x = np.random.rand(n); y = np.random.rand(n); 4 * np.mean(x**2 + y**2 < 1)}
+  \end{enumerate}
+\end{frame}
+
+\exercicios{5}{%
+  \begin{itemize}\small
+    \item Seção 5.14 (NumPy) do livro; as médias ponderadas e filtros da aula podem ser comparados com os exercícios de listas \textbf{5.7 a 5.13}
+    \item Refaça com NumPy: \textbf{5.14} (fatiamento negativo), \textbf{5.25} (divisíveis por 7 e não por 3)
+  \end{itemize}}
+
+\resumo{
+  \item \texttt{np.array}: elementos de um só tipo, operações elemento a elemento
+  \item \texttt{arange}, \texttt{linspace}, \texttt{zeros}, \texttt{ones}; funções universais \texttt{sin}, \texttt{exp}, \texttt{sqrt}\ldots
+  \item Filtros booleanos: \texttt{a[a > 6]}; \texttt{axis} define em que direção agregar
+  \item Álgebra linear: \texttt{@}, \texttt{np.linalg.solve}, \texttt{polyfit}
+  \item Cuidado: fatias são visões; use \texttt{.copy()}
+  \item Próxima aula: strings
+}
+
+\end{document}

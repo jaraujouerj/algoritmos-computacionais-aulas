@@ -1,0 +1,186 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{01}{Apresentação do Curso}{Pensamento lógico e a ideia de algoritmo}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro da aula}
+  \begin{itemize}
+    \item Quem somos e o que esperamos da disciplina
+    \item Plano de ensino e avaliação
+    \item Por que programar? Por que Python?
+    \item Pensamento lógico: o que é um \alert{algoritmo}
+    \item Primeiro contato com um programa real
+  \end{itemize}
+  \vfill
+  {\footnotesize Referência: Prefácio do livro \emph{Introdução à Programação e aos Algoritmos} (J.~A.~Ribeiro, LTC, 2019).}
+\end{frame}
+
+\begin{frame}{Por que um engenheiro precisa programar?}
+  \begin{columns}[T]
+    \column{0.55\textwidth}
+    \begin{itemize}
+      \item Tecnologia está em tudo: carro, geladeira, celular, rede elétrica\ldots
+      \item Quem não entende a tecnologia fica apenas como \emph{usuário}
+      \item Engenheiros automatizam cálculos, processam dados de medições e simulam sistemas
+      \item Programar é uma ferramenta de trabalho, como a calculadora e a planilha
+    \end{itemize}
+    \column{0.42\textwidth}
+    \begin{exampleblock}{Frase do prefácio}
+      \itshape ``Vivemos em uma sociedade intensamente dependente da ciência e da tecnologia, em que quase ninguém sabe algo sobre ciência e tecnologia.'' (Carl Sagan)
+    \end{exampleblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Programar se aprende programando}
+  \begin{block}{A analogia da culinária}
+    Para cozinhar bem é preciso \textbf{teoria} (como os ingredientes se combinam) e \textbf{prática} (ir para a cozinha). Com programação é igual.
+  \end{block}
+  \begin{itemize}
+    \item Ler livros sem programar \(\Rightarrow\) não funciona
+    \item Programar sem base \(\Rightarrow\) descobrir sozinho o que outros já sabem há décadas
+    \item Vantagem de programar: \alert{feedback imediato}, o erro aparece assim que o programa roda
+  \end{itemize}
+  \begin{alertblock}{Regra de ouro da disciplina}
+    Todo conceito visto em aula deve ser digitado e executado por você.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{Estrutura da disciplina (32+ aulas)}
+  \centering
+  \small
+  \begin{tabular}{@{}p{3.3cm}p{6.7cm}l@{}}
+    \toprule
+    \textbf{Bloco} & \textbf{Conteúdo} & \textbf{Aulas}\\
+    \midrule
+    1. Computação essencial & Bases numéricas, arquitetura, algoritmos & 1--4\\
+    2. Fundamentos & Tipos, decisão, repetição, funções, módulos, exceções & 5--15\\
+    3. Estruturas de dados & Listas, matrizes, dicionários, NumPy, strings, arquivos & 16--25\\
+    4. Análise de dados e projeto & Matplotlib, Pandas e projeto final & 26--35\\
+    \bottomrule
+  \end{tabular}
+  \vspace{2ex}
+
+  \footnotesize Provas: \textbf{P1} (aula 15) e \textbf{P2} (aula 25). Projeto final em grupos de 2 ou 3 alunos.\\
+  \emph{Engenharia de Computação:} acrescenta os capítulos de Recursão e Ordenação.
+\end{frame}
+
+\begin{frame}{Material e ferramentas}
+  \begin{itemize}
+    \item \textbf{Livro-texto:} Ribeiro, J.~A. \emph{Introdução à Programação e aos Algoritmos}. LTC, 2019.
+    \item \textbf{Site do livro:} exercícios com solução comentada e exercícios extras
+          \par\href{\siteurl}{\texttt{\siteurl}}
+    \item \textbf{Linguagem:} Python 3
+    \item \textbf{Ambiente:} Python instalado (Apêndice do livro), editor de texto/IDE e Jupyter para a parte de dados
+  \end{itemize}
+  \begin{block}{Combinado}
+    Faça os exercícios do site \emph{antes} de olhar a solução. Praticar é o que gera autonomia.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Pensamento lógico}
+  Programar é, antes de tudo, \textbf{resolver problemas de forma organizada}.
+  \vspace{1ex}
+  \begin{enumerate}
+    \item Entender o problema (entradas, saídas, restrições)
+    \item Dividir em passos pequenos e sem ambiguidade
+    \item Só então escrever em uma linguagem de programação
+    \item Testar com exemplos e corrigir
+  \end{enumerate}
+  \vspace{1ex}
+  \begin{exampleblock}{Pergunta}
+    Como você explicaria a um robô, passo a passo, como atravessar uma rua?
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{O que é um algoritmo?}
+  \begin{block}{Definição}
+    Sequência \textbf{finita} de passos \textbf{precisos} e \textbf{não ambíguos} que, a partir de entradas, produz uma saída e resolve um problema.
+  \end{block}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \textbf{Exemplos do dia a dia}
+    \begin{itemize}
+      \item Receita de bolo
+      \item Trocar um pneu
+      \item Achar uma palavra no dicionário
+      \item Fazer a divisão ``armada''
+    \end{itemize}
+    \column{0.5\textwidth}
+    \textbf{Propriedades}
+    \begin{itemize}
+      \item Entrada e saída bem definidas
+      \item Cada passo é executável
+      \item Termina após um número finito de passos
+    \end{itemize}
+  \end{columns}
+  \vfill
+  {\footnotesize O nome vem de Al-Khwarizmi (matemático persa, séc.~IX).}
+\end{frame}
+
+\begin{frame}[fragile]{Um algoritmo escrito em português}
+  \textbf{Problema:} dado um número, descobrir se ele é par.
+  \begin{enumerate}
+    \item Leia o número \(n\).
+    \item Divida \(n\) por 2 e observe o resto.
+    \item Se o resto for 0, diga ``par''.
+    \item Caso contrário, diga ``ímpar''.
+  \end{enumerate}
+  \vspace{1ex}
+  \textbf{O mesmo algoritmo em Python:}
+\begin{lstlisting}
+n = int(input("Digite um número inteiro: "))
+if n % 2 == 0:
+    print(n, "é par")
+else:
+    print(n, "é ímpar")
+\end{lstlisting}
+  \fonte{Exercício 3.4 do livro}
+\end{frame}
+
+\begin{frame}[fragile]{Primeiro contato com Python}
+  \begin{columns}[T]
+    \column{0.52\textwidth}
+\begin{lstlisting}
+# calcula a área de um triângulo
+base = 5
+altura = 6
+area = (base * altura) / 2
+print('A área é', area)
+\end{lstlisting}
+    \column{0.44\textwidth}
+\begin{lstlisting}[style=saida]
+A área é 15.0
+\end{lstlisting}
+    \vspace{1ex}
+    \begin{itemize}
+      \item \texttt{=} guarda um valor em uma variável
+      \item \texttt{print} mostra o resultado
+      \item \texttt{\#} inicia um comentário
+    \end{itemize}
+  \end{columns}
+  \vfill\fonte{code/Cap2/prog.2.5\_area\_triangulo\_v3.py}
+\end{frame}
+
+\begin{frame}{Atividade em dupla (5 minutos)}
+  Escreva em português, com passos numerados, um algoritmo para uma destas tarefas:
+  \begin{enumerate}
+    \item Fritar um ovo \hfill {\footnotesize (Exercício 2.1)}
+    \item Ensinar uma criança de 6 anos a escovar os dentes \hfill {\footnotesize (Exercício 2.2)}
+    \item Encontrar o maior entre três números
+  \end{enumerate}
+  \vspace{1ex}
+  Depois troque com outra dupla: o algoritmo deles é \alert{sem ambiguidade}? Dá para executar exatamente como está escrito?
+\end{frame}
+
+\exercicios{2}{Exercícios \textbf{2.1} e \textbf{2.2} (algoritmos do cotidiano). Os demais serão vistos na Aula 4.}
+
+\resumo{
+  \item Programar = pensar logicamente + praticar muito
+  \item Algoritmo: passos finitos, precisos e sem ambiguidade
+  \item Usaremos \textbf{Python} e o livro de J.~A.~Ribeiro como base
+  \item Próxima aula: como o computador representa informação (binário, hexadecimal, caracteres)
+}
+
+\end{document}

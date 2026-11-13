@@ -1,0 +1,227 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{05}{Bases da Programação}{Identificadores, dados numéricos, tipos e constantes}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Identificadores e as regras do Python (Cap.~2.6)
+    \item Dados numéricos: inteiros, grandes inteiros, ponto flutuante (2.7)
+    \item Dados não numéricos: texto e lógicos
+    \item Tipos de variáveis; tipagem dinâmica (2.8)
+    \item Constantes (2.9)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Variáveis e identificadores}
+  \begin{itemize}
+    \item \textbf{Variável:} nome que se refere a um valor guardado na memória
+    \item \textbf{Identificador:} o nome escolhido pelo programador (de variáveis, funções, módulos\ldots)
+  \end{itemize}
+  \begin{block}{Regras em Python}
+    \begin{itemize}\small
+      \item Começa com letra ou \texttt{\_}; depois letras, dígitos ou \texttt{\_}
+      \item Sem espaços ou símbolos como \texttt{-}, \texttt{\$}, \texttt{@}
+      \item Diferencia maiúsculas de minúsculas: \texttt{nota} \(\neq\) \texttt{Nota}
+      \item Não pode ser uma \emph{palavra reservada}: \texttt{if}, \texttt{for}, \texttt{while}, \texttt{def}, \texttt{True}\ldots
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Identificadores válidos ou não?}
+  \centering\small
+  \begin{tabular}{lcl}
+    \toprule
+    Identificador & Válido? & Motivo\\
+    \midrule
+    \texttt{media\_final} & sim & \\
+    \texttt{nota1} & sim & dígito não é o primeiro caractere\\
+    \texttt{1nota} & \alert{não} & começa com dígito\\
+    \texttt{area do circulo} & \alert{não} & espaços\\
+    \texttt{valor-total} & \alert{não} & \texttt{-} é o operador de subtração\\
+    \texttt{for} & \alert{não} & palavra reservada\\
+    \texttt{Nota} e \texttt{nota} & sim & são variáveis \emph{diferentes}\\
+    \bottomrule
+  \end{tabular}
+  \vspace{2ex}
+
+  \footnotesize Boa prática: nomes \emph{descritivos} (\texttt{area\_triang}, e não \texttt{x1}). Exercício 2.8: reescrever identificadores incorretos.
+\end{frame}
+
+\begin{frame}[fragile]{Atribuição}
+\begin{lstlisting}
+base = 5            # cria a variável base
+altura = 6
+area_triang = (base * altura) / 2
+base = base + 1     # atualiza o valor
+a, b = 3, 4         # atribuição múltipla
+a, b = b, a         # troca de valores
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{=} \alert{não é igualdade} matemática: é \emph{atribuição} (calcula o lado direito e guarda no esquerdo)
+    \item \texttt{base = base + 1} é válido: lê o valor antigo, soma, guarda o novo
+  \end{itemize}
+  \fonte{code/Cap2/prog.2.5\_area\_triangulo\_v3.py}
+\end{frame}
+
+\begin{frame}{Dados numéricos}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{block}{\texttt{int}}
+      Inteiros: \texttt{42}, \texttt{-7}, \texttt{0}.\\
+      \textbf{Sem limite fixo} em Python!
+    \end{block}
+    \column{0.5\textwidth}
+    \begin{block}{\texttt{float}}
+      Reais (ponto flutuante): \texttt{3.14}, \texttt{-0.5}, \texttt{1e-3}, \texttt{2.5e8}.
+    \end{block}
+  \end{columns}
+  \vspace{1ex}
+  \centering\small
+  \begin{tabular}{lll}
+    \toprule
+    Operador & Operação & Exemplo\\
+    \midrule
+    \texttt{+ - *} & soma, subtração, multiplicação & \texttt{3 * 4} \(\to\) \texttt{12}\\
+    \texttt{/} & divisão real & \texttt{7 / 2} \(\to\) \texttt{3.5}\\
+    \texttt{//} & divisão inteira & \texttt{7 // 2} \(\to\) \texttt{3}\\
+    \texttt{\%} & resto & \texttt{7 \% 2} \(\to\) \texttt{1}\\
+    \texttt{**} & potência & \texttt{2 ** 10} \(\to\) \texttt{1024}\\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\begin{frame}[fragile]{Grandes inteiros: o Universo em milímetros}
+\begin{lstlisting}
+# Tamanho do Universo observável em milímetros
+tamanho_universo = 93000000000        # anos-luz
+segundos_por_min = 60
+segundos_por_h = 60 * segundos_por_min
+segundos_por_dia = 24 * segundos_por_h
+segundos_por_ano = 365 * segundos_por_dia
+velocidade_luz_em_mms = 299792458000  # mm/s
+tamanho_universo_mm = tamanho_universo * velocidade_luz_em_mms * segundos_por_ano
+print("O Universo tem aproximadamente", tamanho_universo_mm, "milímetros.")
+\end{lstlisting}
+  \begin{itemize}
+    \item O resultado tem 27 dígitos; em C ou Java isso daria \emph{overflow}
+    \item Variantes: googol \(=10^{100}\), googolplexo, folha de papel dobrada 107 vezes (Exercícios 2.11 a 2.15)
+  \end{itemize}
+  \fonte{code/Cap2/prog.2.6\_universo.py}
+\end{frame}
+
+\begin{frame}[fragile]{Ponto flutuante: cuidado com a precisão}
+\begin{lstlisting}
+print(0.1, "+", 0.2, "=", 0.1 + 0.2)
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+0.1 + 0.2 = 0.30000000000000004
+\end{lstlisting}
+  \begin{itemize}
+    \item Já vimos na Aula 2: 0,1 não tem representação binária exata
+    \item Para \emph{mostrar} resultados use formatação: \texttt{"\{:.2f\}".format(x)} ou \texttt{f"\{x:.2f\}"}
+    \item Compare \texttt{float} com tolerância, nunca com \texttt{==}
+  \end{itemize}
+  \fonte{code/Cap2/prog.2.7\_erropf.py}
+\end{frame}
+
+\begin{frame}{Dados não numéricos}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{block}{\texttt{str} (texto)}
+      Entre aspas simples ou duplas:\\
+      \texttt{'Olá'}, \texttt{"Python"}\\
+      \texttt{'42'} é texto, não número!
+    \end{block}
+    \column{0.5\textwidth}
+    \begin{block}{\texttt{bool} (lógico)}
+      Só dois valores: \texttt{True} e \texttt{False}.\\
+      Resultado de comparações.
+    \end{block}
+  \end{columns}
+  \vspace{1ex}
+  \begin{exampleblock}{Também existe \texttt{complex}}
+    Números complexos: \texttt{3 + 4j}. Útil em Engenharia Elétrica (impedâncias, fasores).
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}[fragile]{Comparações e valores lógicos}
+\begin{lstlisting}
+x = 1; y = 2; z = 1
+print("x == y?", x == y)     # False
+print("x == z?", x == z)     # True
+print("x != z?", x != z)     # False
+print("x < y?", x < y)       # True
+print("y >= z?", y >= z)     # True
+x = 2
+print("1 < x < 3:", 1 < x < 3)   # True: comparação encadeada
+\end{lstlisting}
+  \begin{itemize}
+    \item Operadores: \texttt{==}, \texttt{!=}, \texttt{<}, \texttt{<=}, \texttt{>}, \texttt{>=}
+    \item Atenção: \texttt{=} atribui; \texttt{==} compara!
+  \end{itemize}
+  \fonte{code/Cap2/prog.2.8\_compara.py, prog.2.9\_compara\_v2.py}
+\end{frame}
+
+\begin{frame}[fragile]{Tipos e tipagem dinâmica}
+\begin{lstlisting}
+x = 23
+print(x, type(x))     # 23 <class 'int'>
+x = 12.4
+print(x, type(x))     # 12.4 <class 'float'>
+x = "Teste"
+print(x, type(x))     # Teste <class 'str'>
+\end{lstlisting}
+  \begin{itemize}
+    \item Em Python \textbf{o tipo pertence ao valor}, não à variável: a mesma variável pode apontar para tipos diferentes
+    \item Conversões explícitas: \texttt{int("42")}, \texttt{float("3.5")}, \texttt{str(7)}
+    \item \texttt{type(x)} mostra o tipo; \texttt{int(3.9)} \(\to\) \texttt{3} (trunca)
+  \end{itemize}
+  \fonte{code/Cap2/prog.2.11\_variaveis\_dinamicas.py}
+\end{frame}
+
+\begin{frame}{Constantes}
+  \begin{itemize}
+    \item Valores que \textbf{não devem mudar} durante o programa (\(\pi\), velocidade da luz, taxas)
+    \item Python não tem constantes ``de verdade''; por \alert{convenção} usamos nomes em MAIÚSCULAS
+    \item Vantagem: mudar o valor em um único lugar e deixar o código legível
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Constantes: identidade de Euler}
+\begin{lstlisting}
+PI = 3.1415
+E = 2.71828
+I = 1j
+print("0 =", E**(PI*I) + 1)
+print("0 = {:.2f}".format(E**(PI*I) + 1))
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+0 = (4.490366412035485e-09+9.476672816471575e-05j)
+0 = 0.00+0.00j
+\end{lstlisting}
+  \begin{itemize}
+    \item O resultado deveria ser exatamente 0: o erro vem da aproximação de \(\pi\) e \(e\)
+    \item O módulo \texttt{math} traz \texttt{math.pi} e \texttt{math.e} mais precisos (Aula 13; Exercício 2.16)
+  \end{itemize}
+  \fonte{code/Cap2/prog.2.12\_euler.py, prog.2.13\_eulerformatado.py}
+\end{frame}
+
+\exercicios{2}{%
+  \begin{itemize}\small
+    \item Identificadores: \textbf{2.8}
+    \item Programas com dados numéricos: \textbf{2.9} (área do quadrado), \textbf{2.10} (segundos desde a meia-noite), \textbf{2.11 a 2.15} (Universo, googol, folha dobrada)
+    \item Constantes: \textbf{2.16 a 2.18} (valores de \(\pi\) e \(e\), hipotenusa, esfera de raio 5)
+  \end{itemize}}
+
+\resumo{
+  \item Identificador: letras, dígitos e \texttt{\_}; não pode começar com dígito nem ser palavra reservada
+  \item Tipos básicos: \texttt{int}, \texttt{float}, \texttt{str}, \texttt{bool}, \texttt{complex}
+  \item Python tem tipagem dinâmica e inteiros de tamanho ilimitado
+  \item Constantes por convenção em MAIÚSCULAS
+  \item Próxima aula: estrutura básica de um programa, entrada e saída
+}
+
+\end{document}

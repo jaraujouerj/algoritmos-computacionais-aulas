@@ -1,0 +1,158 @@
+% ============================================================
+%  Template Beamer - Algoritmos Computacionais I (UERJ)
+%  Uso: copie este arquivo, altere \titulo / \subtitulo / \data
+%  e escreva os slides entre \begin{document} e \end{document}.
+%  Compilar com: pdflatex (ou latexmk -pdf)
+% ============================================================
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{listings}
+
+% ---------- Dados da aula (EDITE AQUI) ----------
+\newcommand{\autor}{João Araujo}
+\newcommand{\disciplina}{Algoritmos Computacionais I}
+\newcommand{\titulo}{Título da Aula}
+\newcommand{\subtitulo}{Subtítulo opcional}
+\newcommand{\data}{\today}
+\newcommand{\instituicao}{Departamento de Engenharia de Sistemas e Computação}
+
+% Caminho do logo (relativo a este arquivo; ajuste se o .tex ficar em subpasta)
+\newcommand{\logouerj}{imagens/logo_uerj_cor_transparencia.png}
+% O logo é opcional: sem o arquivo ele é omitido.
+\newcommand{\logoinst}[1]{\IfFileExists{\logouerj}{\includegraphics[#1]{\logouerj}}{}}
+% Logo da capa: a quebra de linha só existe se o logo existir.
+\newcommand{\logocapa}[1]{\IfFileExists{\logouerj}{\includegraphics[height=#1]{\logouerj}\\[1.2ex]}{}}
+
+% ---------- Cores ----------
+\definecolor{uerjazul}{RGB}{0,62,126}
+\definecolor{uerjcinza}{RGB}{240,242,246}
+
+% ---------- Tema ----------
+\usetheme{default}
+\usecolortheme{default}
+\usefonttheme{professionalfonts}
+\setbeamertemplate{navigation symbols}{}
+
+\setbeamercolor{structure}{fg=uerjazul}
+\setbeamercolor{frametitle}{fg=uerjazul,bg=white}
+\setbeamercolor{title}{fg=uerjazul}
+\setbeamercolor{block title}{fg=white,bg=uerjazul}
+\setbeamercolor{block body}{bg=uerjcinza}
+\setbeamercolor{footline}{fg=white,bg=uerjazul}
+\setbeamercolor{itemize item}{fg=uerjazul}
+\setbeamercolor{enumerate item}{fg=uerjazul}
+
+\setbeamerfont{frametitle}{series=\bfseries,size=\large}
+\setbeamerfont{footline}{size=\scriptsize}
+
+% Título do frame com logo à direita
+\setbeamertemplate{frametitle}{%
+  \nointerlineskip
+  \begin{beamercolorbox}[wd=\textwidth,ht=4ex,dp=1.2ex]{frametitle}
+    \vspace{0.6ex}
+    \usebeamerfont{frametitle}\insertframetitle%
+    \hfill\raisebox{-1.2ex}{\logoinst{height=5ex}}
+  \end{beamercolorbox}%
+  \nointerlineskip
+  {\color{uerjazul}\rule{\textwidth}{1.2pt}}%
+}
+
+% Rodapé: nome do autor | disciplina | número da página
+\setbeamertemplate{footline}{%
+  \leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=.4\paperwidth,ht=2.5ex,dp=1.2ex,left,leftskip=1em]{footline}
+      \usebeamerfont{footline}\autor
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.4\paperwidth,ht=2.5ex,dp=1.2ex,center]{footline}
+      \usebeamerfont{footline}\disciplina
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.2\paperwidth,ht=2.5ex,dp=1.2ex,right,rightskip=1em]{footline}
+      \usebeamerfont{footline}\insertframenumber{} / \inserttotalframenumber
+    \end{beamercolorbox}%
+  }%
+}
+
+% Página de título personalizada
+\setbeamertemplate{title page}{%
+  \vfill
+  \begin{center}
+    \logocapa{3.2cm}
+    {\scriptsize\color{uerjazul}\instituicao}\\[2.5ex]
+    {\usebeamerfont{title}\usebeamercolor[fg]{title}\Large\bfseries\inserttitle\par}
+    \vspace{0.6ex}{\normalsize\color{gray}\insertsubtitle\par}
+    \vspace{2ex}
+    {\color{uerjazul}\rule{0.5\textwidth}{0.6pt}}\\[1.5ex]
+    {\normalsize\autor}\\[0.6ex]
+    {\small\disciplina}\\[0.6ex]
+    {\footnotesize\data}
+  \end{center}
+  \vfill
+}
+
+% Metadados
+\title{\titulo}
+\subtitle{\subtitulo}
+\author{\autor}
+\institute{\instituicao}
+\date{\data}
+
+% Estilo para código
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{uerjcinza},
+  keywordstyle=\color{uerjazul}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{teal},
+  frame=single,
+  rulecolor=\color{uerjazul},
+  showstringspaces=false,
+  inputencoding=utf8,
+  extendedchars=true,
+  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+           {ã}{{\~a}}1 {õ}{{\~o}}1 {ç}{{\c c}}1 {â}{{\^a}}1 {ê}{{\^e}}1 {Ã}{{\~A}}1
+}
+
+% ============================================================
+\begin{document}
+
+% Capa: só título da aula (sem rodapé)
+{
+\setbeamertemplate{footline}{}
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+}
+
+\begin{frame}{Roteiro}
+  \tableofcontents
+\end{frame}
+
+\section{Introdução}
+\begin{frame}{Exemplo de slide}
+  \begin{itemize}
+    \item Primeiro tópico
+    \item Segundo tópico
+  \end{itemize}
+
+  \begin{block}{Definição}
+    Texto em destaque.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Exemplo de código}
+\begin{lstlisting}[language=Python]
+def soma(a, b):
+    # soma dois números
+    return a + b
+
+print(soma(2, 3))
+\end{lstlisting}
+\end{frame}
+
+\end{document}

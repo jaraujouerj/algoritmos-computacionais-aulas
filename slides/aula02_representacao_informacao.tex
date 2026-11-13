@@ -1,0 +1,263 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{02}{Representação da Informação}{Binário, hexadecimal, números com sinal, ponto flutuante e caracteres}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Sistemas de numeração posicionais (Cap.~1.1)
+    \item Números binários, prefixos kilo/mega/giga (1.2)
+    \item Octal e hexadecimal (1.3), Kilo e Kibi (1.4)
+    \item Binário sinalizado: complemento a 2 (1.5)
+    \item Números reais: ponto flutuante IEEE 754 (1.6)
+    \item Caracteres: ASCII e Unicode (1.7)
+  \end{itemize}
+  \vfill{\footnotesize Referência: Cap.~1 (1.1--1.7) do livro-texto.}
+\end{frame}
+
+\begin{frame}{Notação posicional}
+  Em base 10, cada algarismo vale uma potência de 10 pela sua posição:
+  \[
+    5532 = 5\cdot10^3 + 5\cdot10^2 + 3\cdot10^1 + 2\cdot10^0
+  \]
+  \begin{itemize}
+    \item O dígito mais à direita é o \alert{menos significativo}; o mais à esquerda, o \alert{mais significativo}
+    \item Outras bases existem: os babilônios usavam base 60 (e até hoje: 17h\,12min\,35s)
+    \item Em uma base \(b\) usamos \(b\) símbolos e o valor é \(\sum d_i\, b^i\)
+  \end{itemize}
+  \begin{exampleblock}{Exercícios 1.1 e 1.2 (site)}
+    E se tivéssemos 8 dedos? E 12 dedos? Como contaríamos e escreveríamos os números?
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Por que o computador usa binário?}
+  \begin{columns}[T]
+    \column{0.55\textwidth}
+    \begin{itemize}
+      \item Circuitos eletrônicos distinguem bem \textbf{dois} estados: ligado/desligado, tensão alta/baixa
+      \item Um dígito binário é um \textbf{bit} (\emph{binary digit})
+      \item 8 bits formam um \textbf{byte}
+      \item Com \(n\) bits representamos \(2^n\) valores diferentes
+    \end{itemize}
+    \column{0.42\textwidth}
+    \begin{block}{Exemplo}
+      10 bits \(\Rightarrow 2^{10}=1024\) valores, de \(0\) a \(1023\)\\[1ex]
+      {\footnotesize (Exercício 1.3)}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Binário \(\leftrightarrow\) decimal}
+  \textbf{Binário para decimal:} some as potências de 2 das posições com bit 1.
+  \[ 1011_2 = 1\cdot 8 + 0\cdot 4 + 1\cdot 2 + 1\cdot 1 = 11_{10} \]
+  \textbf{Decimal para binário:} divisões sucessivas por 2; leia os restos de baixo para cima.
+  \begin{center}\small
+    \begin{tabular}{rcl}
+      \(13 \div 2\) & = 6 & resto \textbf{1}\\
+      \(6 \div 2\)  & = 3 & resto \textbf{0}\\
+      \(3 \div 2\)  & = 1 & resto \textbf{1}\\
+      \(1 \div 2\)  & = 0 & resto \textbf{1}
+    \end{tabular}
+    \quad \(\Rightarrow\quad 13_{10} = 1101_2\)
+  \end{center}
+  \footnotesize Exercícios 1.4 e 1.5 (conversões nos dois sentidos).
+\end{frame}
+
+\begin{frame}[fragile]{Conferindo no Python}
+\begin{lstlisting}
+>>> bin(13)            # decimal -> binário
+'0b1101'
+>>> int('1101', 2)     # binário -> decimal
+13
+>>> 0b1101 + 0b11      # literais binários
+16
+>>> 2**10
+1024
+\end{lstlisting}
+  \begin{alertblock}{Atenção}
+    O Python é uma \emph{calculadora de conferência}: converta à mão primeiro (a prova será no papel) e depois verifique no interpretador.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{Prefixos: kilo, mega, giga\ldots}
+  \centering
+  \begin{tabular}{llll}
+    \toprule
+    Prefixo & Símbolo & Decimal (SI) & Binário (IEC)\\
+    \midrule
+    kilo / kibi & k / Ki & \(10^3\) & \(2^{10}=1024\)\\
+    mega / mebi & M / Mi & \(10^6\) & \(2^{20}\)\\
+    giga / gibi & G / Gi & \(10^9\) & \(2^{30}\)\\
+    tera / tebi & T / Ti & \(10^{12}\) & \(2^{40}\)\\
+    peta / pebi & P / Pi & \(10^{15}\) & \(2^{50}\)\\
+    \bottomrule
+  \end{tabular}
+  \vspace{1.5ex}
+
+  \begin{block}{Por que um disco de ``1 TB'' aparece com 931 GiB?}
+    O fabricante usa \(10^{12}\) bytes; o sistema operacional divide por \(2^{30}\). Veja os Exercícios 1.10 e 1.11 (velocidade de internet e disco externo).
+  \end{block}
+\end{frame}
+
+\begin{frame}{Octal e hexadecimal}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{itemize}
+      \item \textbf{Octal} (base 8): 3 bits por dígito
+      \item \textbf{Hexadecimal} (base 16): 4 bits por dígito; símbolos 0--9 e A--F
+      \item Mais compactos que o binário e fáceis de converter
+    \end{itemize}
+    \column{0.5\textwidth}
+    \centering\small
+    \begin{tabular}{cccc}
+      \toprule
+      Dec & Bin & Oct & Hex\\
+      \midrule
+      0 & 0000 & 0 & 0\\
+      7 & 0111 & 7 & 7\\
+      9 & 1001 & 11 & 9\\
+      10 & 1010 & 12 & A\\
+      15 & 1111 & 17 & F\\
+      \bottomrule
+    \end{tabular}
+  \end{columns}
+  \vspace{1ex}
+  \begin{exampleblock}{Truque}
+    Agrupe os bits de 4 em 4 a partir da direita: \(1101\,0110_2 = \text{D6}_{16}\). Exercícios 1.7 a 1.9.
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}[fragile]{Hexadecimal na prática}
+\begin{lstlisting}
+>>> hex(255)
+'0xff'
+>>> oct(64)
+'0o100'
+>>> int('D6', 16)
+214
+>>> 0xD6 == 0b11010110
+True
+\end{lstlisting}
+  \begin{itemize}
+    \item Cores em páginas web: \texttt{\#FF8800} = vermelho 255, verde 136, azul 0
+    \item Endereços de memória e códigos de erro costumam aparecer em hexadecimal
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Números com sinal: o problema}
+  Como representar \(-5\) usando só 0s e 1s? O livro apresenta quatro técnicas (1.5):
+  \begin{enumerate}
+    \item \textbf{Sinal/valor}: o primeiro bit é o sinal (1 = negativo)
+    \item \textbf{Excesso--N}: soma-se um deslocamento fixo
+    \item \textbf{Complemento a 1}: inverte-se todos os bits
+    \item \textbf{Complemento a 2}: inverte-se e soma-se 1 \hfill {\small\(\leftarrow\) usada nos computadores}
+  \end{enumerate}
+  \vspace{1ex}
+  \begin{block}{Por que complemento a 2?}
+    Só existe um zero e a \textbf{soma funciona sem tratar o sinal}: o mesmo circuito soma positivos e negativos.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Complemento a 2 com 8 bits}
+  \textbf{Como obter} \(-5\):
+  \begin{center}\small
+    \begin{tabular}{rl}
+      \(+5\) & \texttt{0000 0101}\\
+      inverter os bits & \texttt{1111 1010}\\
+      somar 1 & \texttt{1111 1011} \(= -5\)
+    \end{tabular}
+  \end{center}
+  \begin{itemize}
+    \item Faixa com \(n\) bits: de \(-2^{n-1}\) a \(2^{n-1}-1\) (8 bits: \(-128\) a \(127\))
+    \item Soma \(5 + (-5)\): \texttt{0000 0101} + \texttt{1111 1011} = \texttt{1 0000 0000}; descartando o \emph{vai-um} sobra \texttt{0000 0000}
+    \item \alert{Overflow:} \(127+1\) em 8 bits resulta em \(-128\)
+  \end{itemize}
+  \footnotesize Exercícios 1.12 a 1.15 (para casa): converter \(\pm 215\) e somar \(120+8\) em binário.
+\end{frame}
+
+\begin{frame}{Números reais: ponto fixo e ponto flutuante}
+  \begin{itemize}
+    \item \textbf{Vírgula fixa:} parte inteira e parte fracionária com número fixo de bits (pouca faixa)
+    \item \textbf{Ponto flutuante (IEEE 754):} notação científica em binário
+  \end{itemize}
+  \[ \text{valor} = (-1)^{s}\times 1.m \times 2^{e} \]
+  \begin{center}\small
+    \begin{tabular}{lccc}
+      \toprule
+      Precisão & Sinal & Expoente & Mantissa\\
+      \midrule
+      Simples (32 bits) & 1 & 8 & 23\\
+      Dupla (64 bits) & 1 & 11 & 52\\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+  \footnotesize O \texttt{float} do Python usa precisão dupla. Exercícios 1.16 a 1.18.
+\end{frame}
+
+\begin{frame}[fragile]{Consequência: $0{,}1$ não é exato}
+\begin{lstlisting}
+>>> 0.1 + 0.2
+0.30000000000000004
+>>> 0.1 + 0.2 == 0.3
+False
+>>> abs((0.1 + 0.2) - 0.3) < 1e-9
+True
+\end{lstlisting}
+  \begin{itemize}
+    \item \(0{,}1\) é uma dízima periódica em binário: o computador guarda uma aproximação
+    \item Nunca compare \texttt{float} com \texttt{==}; compare com uma \alert{tolerância}
+  \end{itemize}
+  \fonte{code/Cap2/prog.2.7\_erropf.py}
+\end{frame}
+
+\begin{frame}{Representação de caracteres}
+  \begin{itemize}
+    \item Cada caractere recebe um \textbf{código numérico}
+    \item \textbf{ASCII} (7 bits, 128 símbolos): letras sem acento, dígitos, pontuação
+    \item \textbf{Unicode}: mais de 140 mil símbolos de todos os idiomas; \textbf{UTF-8} é a codificação mais usada
+  \end{itemize}
+  \centering\small
+  \begin{tabular}{cccccc}
+    \toprule
+    Caractere & A & B & a & 0 & espaço\\
+    \midrule
+    Código (dec) & 65 & 66 & 97 & 48 & 32\\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\begin{frame}[fragile]{Caracteres no Python}
+\begin{lstlisting}
+>>> ord('A')        # caractere -> código
+65
+>>> chr(97)         # código -> caractere
+'a'
+>>> chr(ord('a') - 32)
+'A'
+>>> 'ação'
+'ação'
+\end{lstlisting}
+  \begin{itemize}
+    \item Diferença entre maiúscula e minúscula: 32 (apenas um bit)
+    \item Strings do Python 3 são Unicode: \texttt{'ç'} e \texttt{'ã'} funcionam normalmente
+  \end{itemize}
+\end{frame}
+
+\exercicios{1}{%
+  \begin{itemize}\small
+    \item Bases: \textbf{1.1, 1.2} (outras contagens) e \textbf{1.3 a 1.9} (binário, octal e hexadecimal)
+    \item Unidades: \textbf{1.10, 1.11} (Mbits/s, disco externo)
+    \item \emph{Para casa:} \textbf{1.12 a 1.15} (complemento a 2) e \textbf{1.16 a 1.18} (IEEE 754)
+  \end{itemize}}
+
+\resumo{
+  \item Computadores usam binário; \(n\) bits representam \(2^n\) valores
+  \item Octal e hexadecimal agrupam 3 e 4 bits
+  \item Inteiros com sinal: complemento a 2; reais: IEEE 754 (aproximações!)
+  \item Caracteres são números: ASCII e Unicode
+  \item Próxima aula: arquitetura de von Neumann e o ambiente Python
+}
+
+\end{document}

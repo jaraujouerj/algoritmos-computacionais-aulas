@@ -1,0 +1,148 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{26}{Lançamento do Projeto Final}{Temas, grupos, escopo e cronograma}
+
+\begin{document}
+\capa
+
+\begin{frame}{O projeto final}
+  \begin{columns}[T]
+    \column{0.55\textwidth}
+    \begin{itemize}
+      \item Programa \textbf{completo} que resolve um problema real da sua área de engenharia
+      \item Em \textbf{grupos de 2 ou 3 alunos}
+      \item Desenvolvido em \textbf{etapas}, com feedback contínuo em cada aula
+      \item Integra tudo o que vimos: funções, listas e dicionários, arquivos, exceções, NumPy, Pandas e Matplotlib
+    \end{itemize}
+    \column{0.42\textwidth}
+    \begin{exampleblock}{Objetivo}
+      Passar de ``resolver exercícios'' para \alert{construir um programa} que outra pessoa consiga usar e entender.
+    \end{exampleblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{O que deve aparecer no projeto}
+  \begin{itemize}
+    \item \textbf{Pense antes de programar} (Cap.~9): problema bem definido, esboço, casos-limite
+    \item \textbf{Estruturas de controle} (Cap.~3): decisões e repetições
+    \item \textbf{Funções} (Cap.~4): programa dividido em funções coesas, módulos organizados
+    \item \textbf{Estruturas de dados} (Cap.~5): listas, dicionários, tuplas; matrizes
+    \item \textbf{Arquivos} (Cap.~6): leitura e/ou gravação (texto, CSV)
+    \item \textbf{Tratamento de erros}: entradas inválidas e arquivos ausentes
+    \item \textbf{NumPy / Pandas / Matplotlib} quando aplicável: cálculo, análise e gráficos
+  \end{itemize}
+  \begin{alertblock}{Requisito mínimo}
+    Pelo menos \textbf{5 funções}, \textbf{1 arquivo de dados}, \textbf{tratamento de erros} e, quando houver dados numéricos, \textbf{2 gráficos}.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{Sugestões de temas (gerais)}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{itemize}
+      \item Sistema de biblioteca simples
+      \item Controle financeiro pessoal
+      \item Jogo textual (forca, velha, labirinto)
+      \item Simulador simples: fila, elevador, semáforo
+      \item Agenda de contatos / de tarefas
+    \end{itemize}
+    \column{0.5\textwidth}
+    \begin{itemize}
+      \item Análise de dados em arquivo CSV (esportes, clima, finanças)
+      \item Calculadora científica / de unidades
+      \item Quiz com banco de perguntas em arquivo
+      \item Gerador de relatórios (texto + gráficos)
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Sugestões por engenharia}
+  \small
+  \begin{tabular}{@{}p{3.6cm}p{8.6cm}@{}}
+    \toprule
+    \textbf{Civil / Produção} & Gestão de insumos e custos com dicionários e arquivos; controle de estoque; análise de produção e paradas (CSV + Pandas); orçamento de obra.\\
+    \textbf{Elétrica / Mecânica} & Simulador de circuitos (leis de Kirchhoff com NumPy); tabelas termodinâmicas; análise de ensaios (ajuste e gráfico); dimensionamento de componentes.\\
+    \textbf{Ambiental / Cartográfica} & Séries históricas de temperatura/chuva; conversor de coordenadas geográficas; cálculo de distâncias e áreas; mapas de calor em matriz.\\
+    \textbf{Computação} & Jogos com matrizes (velha, campo minado); simulações; recursão e ordenação aplicadas; mini-sistema com módulos.\\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\begin{frame}{Dados para analisar}
+  \begin{itemize}
+    \item Arquivos de exemplo na pasta do curso: produção de peças (\texttt{dadosproducao.csv}) e produção/paradas mensais
+    \item Dados abertos: IBGE, INMET (clima), Banco Mundial, Gapminder, Portal da Transparência
+    \item \textbf{Seus próprios dados}: medições de laboratório, planilhas de estágio ou de iniciação científica (com autorização)
+  \end{itemize}
+  \begin{block}{Boa pergunta de projeto}
+    ``Qual máquina/turno tem a maior taxa de defeitos?'' \(\cdot\) ``Como a temperatura média evoluiu em 30 anos?'' \(\cdot\) ``Qual a resistência de um componente a partir de ensaios?''\\
+    \small\emph{Uma pergunta clara \(\Rightarrow\) um projeto focado.}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Hoje: formação dos grupos e esboço inicial}
+  \begin{enumerate}
+    \item \textbf{Forme o grupo} (2 ou 3 pessoas) e escolha um nome
+    \item \textbf{Escolha o tema} (ou proponha o seu) e responda por escrito:
+    \begin{itemize}\small
+      \item Qual problema vamos resolver? Para quem?
+      \item Quais as entradas e as saídas?
+      \item Que dados usaremos? De onde vêm?
+    \end{itemize}
+    \item \textbf{Esboço inicial} (meia página): 3 a 5 funcionalidades principais
+    \item Entregue o esboço ao professor ao final da aula
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Cronograma do projeto}
+  \centering\small
+  \begin{tabular}{cll}
+    \toprule
+    \textbf{Aula} & \textbf{Etapa} & \textbf{Entrega}\\
+    \midrule
+    26 & Lançamento & grupos e esboço\\
+    27--29 & Matplotlib e Pandas (ferramentas) & exercícios de laboratório\\
+    30 & Especificação & documento de especificação\\
+    31 & Implementação 1 & esqueleto funcionando\\
+    32 & Implementação 2 & arquivos e erros\\
+    33 & Refatoração e testes & código limpo e testes\\
+    34--35 & Apresentação & código + demonstração\\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\begin{frame}{Critérios de avaliação}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{block}{Funcionalidade}
+      O programa atende aos requisitos especificados e funciona sem ``quebrar''?
+    \end{block}
+    \begin{block}{Organização do código}
+      Bem estruturado, nomes claros, fácil de entender?
+    \end{block}
+    \column{0.5\textwidth}
+    \begin{block}{Modularização}
+      Código organizado em funções e módulos de forma lógica?
+    \end{block}
+    \begin{block}{Clareza na explicação}
+      Os alunos explicam as decisões de projeto e a implementação?
+    \end{block}
+  \end{columns}
+  \vspace{1ex}
+  \small Todos os integrantes devem saber explicar \emph{qualquer} parte do código.
+\end{frame}
+
+\begin{frame}{Dicas para um bom começo}
+  \begin{itemize}
+    \item \textbf{Comece pequeno}: uma versão simples que funciona vale mais que uma ambiciosa que não roda
+    \item Crie a pasta do projeto, um arquivo principal e \alert{use controle de versões} se conhecer Git
+    \item Divida as tarefas, mas \textbf{integrem cedo e com frequência}
+    \item Peça feedback ao professor em toda aula de implementação
+    \item Código em equipe: combinem o estilo (nomes, indentação, docstrings)
+  \end{itemize}
+  \begin{exampleblock}{Próxima aula (30)}
+    Especificação detalhada do problema, das funcionalidades e da estrutura do programa.
+  \end{exampleblock}
+\end{frame}
+
+\end{document}

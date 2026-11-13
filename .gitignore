@@ -1,0 +1,35 @@
+# Repositório público: versiona apenas slides, código dos exemplos e template.
+# O restante desta pasta (livros, provas, trabalhos de alunos etc.) fica de fora.
+/*
+!/.gitignore
+!/README.md
+!/LICENSE-CODIGO
+!/LICENSE-SLIDES.md
+!/template_aula.tex
+!/slides/
+!/code/
+!/notebooks/
+!/imagens/
+
+# Logo da instituição: não faz parte do repositório (veja o README)
+/imagens/logo_uerj*
+
+# PDFs são arquivos gerados: ficam no site e nos releases
+*.pdf
+
+# Ambiente virtual e caches do Python
+/code/Cap5/livro/
+__pycache__/
+*.pyc
+
+# Auxiliares do LaTeX
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
+*.synctex.gz
+*.fdb_latexmk
+*.fls

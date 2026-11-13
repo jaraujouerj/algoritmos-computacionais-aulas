@@ -1,0 +1,231 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{24}{Revisão e Exercícios}{Modularização, boas práticas e estilo de código (Cap.~4 a 6 e Cap.~9)}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Um pouco de estilo (Cap.~9): pensar, escrever para o leitor, simplicidade, testes
+    \item Ferramentas: PEP~8, \texttt{pylint}, formatadores
+    \item Testando funções: \texttt{assert}
+    \item Revisão dos capítulos 4 a 6 e orientações para a Prova 2
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{9.1 Pense antes de programar}
+  \begin{columns}[T]
+    \column{0.55\textwidth}
+    \begin{enumerate}
+      \item \textbf{Entenda} o problema; explique-o a um colega
+      \item \textbf{Pesquise}: já existe um caminho conhecido?
+      \item \textbf{Esboce} no papel: algoritmo, estruturas de dados
+      \item \textbf{Liste os casos-limite}: lista vazia, zero, entrada inválida
+      \item Escolha uma solução \emph{razoável} e avance (o ótimo é inimigo do bom)
+    \end{enumerate}
+    \column{0.42\textwidth}
+    \begin{exampleblock}{Brainstorming}
+      Primeiro gere todas as ideias, \emph{sem censura}; só depois elimine, com um critério.
+    \end{exampleblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{9.2 Preocupe-se com seu leitor}
+  \begin{itemize}
+    \item Código é lido muito mais vezes do que escrito: o leitor pode ser \alert{você daqui a três semanas}
+    \item \textbf{Nomes significativos} e coerentes: \texttt{media\_final}, não \texttt{mf} ou \texttt{x2}
+    \item Siga o estilo da linguagem: \texttt{snake\_case} para variáveis e funções, MAIÚSCULAS para constantes
+    \item Funções \textbf{curtas}: se não cabe na tela, divida
+    \item Linhas com no máximo \textbf{79 caracteres}; 4 espaços de indentação
+    \item Comente o \emph{porquê}, não o óbvio; um bom nome dispensa o comentário
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Antes e depois}
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+    \textbf{Difícil de ler}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+def f(l):
+    r=0
+    for i in l:
+        if i>=0:r=r+i
+    return r/len(l)
+x=[3,-1,4]
+print(f(x))
+\end{lstlisting}
+    \column{0.5\textwidth}
+    \textbf{Legível}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+def media_dos_positivos(valores):
+    """Média dos valores >= 0."""
+    positivos = [v for v in valores if v >= 0]
+    if not positivos:
+        return 0.0
+    return sum(positivos) / len(positivos)
+
+medidas = [3, -1, 4]
+print(media_dos_positivos(medidas))
+\end{lstlisting}
+  \end{columns}
+  \vspace{1ex}
+  \small Observe: nomes claros, docstring, tratamento da lista vazia (caso-limite), e a divisão só pelos positivos (o original divide por \emph{todos}: comportamento diferente!).
+\end{frame}
+
+\begin{frame}{9.3 Seja simples \(\cdot\) 9.4 Seja desapegado}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{block}{Seja simples}
+      \begin{itemize}\small
+        \item Evite ``truques'' e códigos espertos
+        \item Não otimize antes da hora
+        \item Muitos comentários podem indicar código obscuro
+      \end{itemize}
+    \end{block}
+    \column{0.5\textwidth}
+    \begin{block}{Seja desapegado}
+      \begin{itemize}\small
+        \item Código de 3 semanas atrás parece escrito por outra pessoa
+        \item Se uma solução dá muita dor de cabeça, \emph{recomece}
+        \item Código ruim se apaga
+      \end{itemize}
+    \end{block}
+  \end{columns}
+  \vspace{1.5ex}
+  \begin{alertblock}{Exemplo ``esperto'' demais}
+    O \texttt{code/Cap5/prog.5.c\_lifegame.py} faz o Jogo da Vida em uma compreensão gigante. Funciona, mas ninguém consegue ler. Reescreva-o em funções (Exercício de refatoração).
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{PEP 8 e ferramentas}
+  \centering\small
+  \begin{tabular}{p{2.6cm}p{8.6cm}}
+    \toprule
+    Ferramenta & Para que serve\\
+    \midrule
+    \texttt{pylint} & analisa o código e aponta problemas de estilo e erros prováveis (nota de 0 a 10)\\
+    \texttt{pycodestyle} & verifica a conformidade com o guia PEP~8\\
+    \texttt{yapf}, \texttt{black} & \emph{formatam} automaticamente o arquivo\\
+    \bottomrule
+  \end{tabular}
+  \vspace{1.5ex}
+
+  \begin{block}{Uso}
+    \texttt{pip install pylint yapf}\\
+    \texttt{pylint programa.py} \hspace{2em} \texttt{yapf -i programa.py}
+  \end{block}
+  \footnotesize Nem todo conselho do \texttt{pylint} precisa ser seguido, mas entender cada reclamação ensina muito (Cap.~9.2).
+\end{frame}
+
+\begin{frame}[fragile]{O Zen do Python}
+  Em um terminal Python digite \texttt{import this}:
+  \begin{itemize}
+    \item Belo é melhor que feio.
+    \item Explícito é melhor que implícito.
+    \item Simples é melhor que complexo.
+    \item Legibilidade conta.
+    \item Erros nunca devem passar silenciosamente.
+  \end{itemize}
+  \vspace{1ex}
+  \small\emph{Python foi projetado para criar bons hábitos de programação.} (Cap.~9.6)
+\end{frame}
+
+\begin{frame}[fragile]{9.5 Teste seu programa: \texttt{assert}}
+\begin{lstlisting}
+def eh_bissexto(ano):
+    return (ano % 4 == 0 and ano % 100 != 0) or ano % 400 == 0
+
+# testes: casos típicos e casos-limite
+assert eh_bissexto(2024)
+assert not eh_bissexto(2023)
+assert not eh_bissexto(1900)     # divisível por 100, não por 400
+assert eh_bissexto(2000)         # divisível por 400
+print("Todos os testes passaram!")
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{assert condição}: se for falsa, o programa para com \texttt{AssertionError}
+    \item Testes escritos \alert{não} se esquecem; rode-os a cada modificação
+    \item Teste \emph{desde o início}, e pense nas condições-limite
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Teste de funções com listas e strings}
+\begin{lstlisting}
+def inverte(s):
+    return s[::-1]
+
+def media(lista):
+    if not lista:
+        return 0.0
+    return sum(lista) / len(lista)
+
+assert inverte('abc') == 'cba'
+assert inverte('') == ''
+assert media([2, 4, 6]) == 4
+assert media([]) == 0.0
+assert abs(media([0.1, 0.2]) - 0.15) < 1e-12   # float: com tolerância
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Revisão: Capítulo 4 (funções e módulos)}
+  \begin{itemize}
+    \item Funções: \texttt{def}, parâmetros, \texttt{return}, valores padrão, retorno múltiplo
+    \item Escopo: local \emph{versus} global; \texttt{UnboundLocalError}
+    \item Módulos: \texttt{import}, criar o seu, \texttt{\_\_name\_\_ == "\_\_main\_\_"}
+    \item Exceções: \texttt{try}/\texttt{except}/\texttt{else}/\texttt{finally}
+  \end{itemize}
+  \begin{exampleblock}{Pergunta de prova}
+    Escreva \texttt{le\_float(msg, minimo, maximo)} que repete a leitura até o usuário digitar um número válido no intervalo.
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Revisão: Capítulo 5 (listas, matrizes, dicionários, tuplas, NumPy)}
+  \begin{itemize}
+    \item Listas: índices, fatias \texttt{[i:j:k]}, compreensão, métodos, \emph{alias} \(\times\) cópia
+    \item Matrizes: lista de listas, o erro de \texttt{[[0]*c]*l}
+    \item Dicionários: \texttt{d[chave]}, \texttt{get}, \texttt{items}, padrão de contagem
+    \item Tuplas: imutáveis, desempacotamento, chaves de dicionário
+    \item NumPy: operações vetorizadas, máscaras booleanas, \texttt{axis}
+  \end{itemize}
+  \begin{exampleblock}{Pergunta de prova}
+    Dado um dicionário \texttt{\{'M1': [31.6, 34.5], 'M2': [24.9]\}}, produza o tempo médio de cada máquina.
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Revisão: Capítulo 6 (strings e arquivos)}
+  \begin{itemize}
+    \item Strings: imutáveis, fatias, \texttt{split}/\texttt{join}, \texttt{strip}, f-strings
+    \item Arquivos: modos \texttt{'r'}, \texttt{'w'}, \texttt{'a'}; \texttt{with}; \texttt{rstrip}; CSV
+  \end{itemize}
+  \begin{exampleblock}{Pergunta de prova}
+    Leia um arquivo de texto e grave em outro as linhas \alert{invertidas} (última primeira), sem as linhas em branco.
+  \end{exampleblock}
+  \begin{block}{Questão ``leia o código''}
+    \texttt{s = 'engenharia'; print(s[::2], s[-3:], s.upper().count('E'))}\\
+    \small Resposta: \texttt{egnai ria 2}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Orientações para a Prova 2 (Aula 25)}
+  \begin{itemize}
+    \item \textbf{Conteúdo:} capítulos 4 a 6 (funções, módulos, exceções, estruturas de dados, strings e arquivos) + estilo (Cap.~9)
+    \item Programas completos e funções; leitura de trechos de código
+    \item Estude refazendo exercícios do site \emph{sem} olhar a solução
+    \item Treine escrever à mão: a prova não tem computador
+  \end{itemize}
+  \begin{alertblock}{Depois da Prova 2}
+    Começa o projeto final (Aula 26). Pense desde já em um problema da sua área que possa ser resolvido com um programa!
+  \end{alertblock}
+\end{frame}
+
+\exercicios{5}{%
+  \begin{itemize}\small
+    \item Capítulo 4: \textbf{4.7, 4.8, 4.11, 4.12, 4.13, 4.16}
+    \item Capítulo 5: \textbf{5.7 a 5.16, 5.25, 5.26, 5.27, 5.29, 5.33}
+    \item Capítulo 6: \textbf{6.4 a 6.9, 6.13, 6.14}
+  \end{itemize}
+  \vspace{0.5ex}
+  \footnotesize Capítulo 9 não tem exercícios no site: aplique as recomendações aos seus próprios programas.}
+
+\end{document}

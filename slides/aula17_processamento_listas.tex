@@ -1,0 +1,184 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{17}{Processamento de Listas}{Fatiamento, compreensão de listas e métodos}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Listas por compreensão (Cap.~5.4)
+    \item Somando e multiplicando listas (5.5)
+    \item Extraindo sublistas: fatiamento (5.6)
+    \item Prática com exercícios do site
+  \end{itemize}
+  \vspace{1ex}
+  \begin{block}{Dica}
+    Esta é uma aula de \textbf{prática}: tente cada exemplo no interpretador antes de avançar.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Listas por compreensão}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+lista = [1, 2, 3, 5, 7]
+lista_nova = [x * x for x in lista]
+lista_quadrados = [x * x for x in range(5)]
+print(lista_nova)         # [1, 4, 9, 25, 49]
+print(lista_quadrados)    # [0, 1, 4, 9, 16]
+\end{lstlisting}
+  \begin{block}{Receita}
+    \texttt{[ \emph{expressão} for \emph{item} in \emph{sequência} ]}: constrói uma lista nova aplicando a expressão a cada item.
+  \end{block}
+  Equivale ao laço com \texttt{append}, mas em uma linha:
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+lista_nova = []
+for x in lista:
+    lista_nova.append(x * x)
+\end{lstlisting}
+  \fonte{code/Cap5/prog.5.15\_lista\_compreensao.py}
+\end{frame}
+
+\begin{frame}[fragile]{Compreensão com filtro}
+\begin{lstlisting}
+lista_nova = [x * x for x in range(10) if x % 2 == 0]
+print(lista_nova)          # [0, 4, 16, 36, 64]
+
+nomes = ['José', 'João', 'Joaquim']
+lista = ['Bom dia, ' + x for x in nomes]
+for saudacao in lista:
+    print(saudacao)
+\end{lstlisting}
+  \begin{itemize}
+    \item O \texttt{if} no final escolhe \emph{quais} itens entram
+    \item Exercícios 5.7 a 5.10: quadrados dos pares, quadrados dos ímpares, cubos, múltiplos de 7
+  \end{itemize}
+  \fonte{code/Cap5/prog.5.16\_lista\_compreensaocomfiltro.py, 5.17\_bomdialistas.py}
+\end{frame}
+
+\begin{frame}[fragile]{Diferença entre listas com compreensão}
+\begin{lstlisting}
+a = [2, 3, 4, 5, 5, 4, 7]
+b = [7, 4, 5]
+lista_nova = [x for x in a if x not in b]
+print(lista_nova)          # [2, 3]
+\end{lstlisting}
+  \begin{itemize}
+    \item ``Elementos de \texttt{a} que \alert{não} estão em \texttt{b}'': compreensão + filtro com \texttt{not in}
+    \item Muito usada para limpar dados: remover valores inválidos, selecionar registros\ldots
+  \end{itemize}
+  \begin{exampleblock}{Exemplo de engenharia}
+    \texttt{validas = [t for t in medidas if -50 <= t <= 150]}\\
+    \footnotesize Descarta leituras impossíveis de um sensor de temperatura.
+  \end{exampleblock}
+  \fonte{code/Cap5/prog.5.19\_lista\_diferenca.py}
+\end{frame}
+
+\begin{frame}[fragile]{Somando e multiplicando listas}
+\begin{lstlisting}
+lista1 = [1, 2, 3]
+print(lista1 * 3)              # [1, 2, 3, 1, 2, 3, 1, 2, 3]
+print(lista1 + [4, 5])         # [1, 2, 3, 4, 5]
+zeros = [0] * 10               # lista com 10 zeros
+print(zeros)
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{+} \alert{concatena} listas; \texttt{*} \alert{repete} a lista
+    \item Não é soma vetorial! \texttt{[1,2] + [3,4]} é \texttt{[1,2,3,4]}, e não \texttt{[4,6]} (para isso existe NumPy, Aula 21)
+    \item Exercícios 5.11 e 5.12: rotação de lista; separar pares e ímpares
+  \end{itemize}
+  \fonte{code/Cap5/prog.5.18\_multlista.py}
+\end{frame}
+
+\begin{frame}[fragile]{Fatiamento (\emph{slicing})}
+\begin{lstlisting}
+planetas = ['Mercúrio', 'Vênus', 'Terra', 'Marte', 'Saturno',
+            'Júpiter', 'Urano', 'Netuno']
+print(planetas[2:5])     # ['Terra', 'Marte', 'Saturno']
+print(planetas[:3])      # ['Mercúrio', 'Vênus', 'Terra']
+print(planetas[3:])      # de Marte até o fim
+print(planetas[4:-1])    # de Saturno até Urano
+print(planetas[:])       # cópia completa
+\end{lstlisting}
+  \begin{block}{Regra: \texttt{lista[inicio:fim:passo]}}
+    Inclui o \texttt{inicio}, \alert{exclui} o \texttt{fim}; omitidos valem: começo, fim da lista, passo 1.
+  \end{block}
+  \fonte{code/Cap5/prog.5.20\_planetas.py (Exercício 5.16)}
+\end{frame}
+
+\begin{frame}[fragile]{Fatiamento com passo}
+\begin{lstlisting}
+primos = [2, 3, 13, 17, 19]
+print(primos[::2])       # de 2 em 2: [2, 13, 19]
+print(primos[::3])       # de 3 em 3: [2, 17]
+primos[2:2] = [5, 7]     # insere sem apagar nada
+primos[4:4] = [11]
+print(primos)            # [2, 3, 5, 7, 11, 13, 17, 19]
+primos[2:3] = []         # remove um elemento
+print(primos[3::2])      # de 2 em 2 a partir do índice 3
+\end{lstlisting}
+  \begin{itemize}
+    \item Fatias à esquerda do \texttt{=} \emph{substituem}, \emph{inserem} ou \emph{removem} trechos
+  \end{itemize}
+  \fonte{code/Cap5/prog.5.21\_listas\_fatiamento.py}
+\end{frame}
+
+\begin{frame}[fragile]{Passo negativo: invertendo}
+\begin{lstlisting}
+lista = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+print(lista[::-1])      # [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+print(lista[4::-1])     # [4, 3, 2, 1, 0]
+print(lista[:5:-1])     # [9, 8, 7, 6]
+print(lista[5:2:-1])    # [5, 4, 3]
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{[::-1]} é o jeito mais curto de inverter uma lista (ou uma string!)
+    \item Com passo negativo, o ``começo'' e o ``fim'' são trocados
+    \item Exercícios 5.13 a 5.16: fatiamento e fatiamento negativo
+  \end{itemize}
+  \fonte{code/Cap5/prog.5.22\_passo\_negativo.py}
+\end{frame}
+
+\begin{frame}[fragile]{Revisando as ideias em um exemplo}
+  Dadas as \textbf{leituras horárias} de temperatura de um dia:
+\begin{lstlisting}
+temps = [18.5, 18.0, 17.8, 17.5, 18.2, 19.5, 21.0, 23.4,
+         25.1, 26.8, 28.0, 29.1, 29.5, 29.2, 28.4, 27.0,
+         25.3, 23.9, 22.5, 21.4, 20.5, 19.8, 19.2, 18.7]
+manha = temps[6:12]                       # 6h às 11h
+tarde = temps[12:18]                      # 12h às 17h
+quentes = [t for t in temps if t > 28]
+em_f = [round(9 / 5 * t + 32, 1) for t in temps]
+alternadas = temps[::2]                   # a cada 2 horas
+\end{lstlisting}
+  \small Uma lista, várias visões: fatias para recortar, compreensões para transformar e filtrar.
+\end{frame}
+
+\begin{frame}{Atividade: mãos à obra}
+  Com a lista \texttt{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}, escreva (\alert{em uma linha cada}) o código que gera:
+  \begin{enumerate}\small
+    \item \texttt{[5, 6, 7, 8, 9, 0, 1, 2, 3, 4]} \hfill (rotação, Exercício 5.11)
+    \item \texttt{[1, 3, 5, 7, 9, 0, 2, 4, 6, 8]} \hfill (Exercício 5.12)
+    \item \texttt{[9, 7, 5, 3, 1]}
+    \item \texttt{[0, 1, 4, 9, 16, 25, 36, 49, 64, 81]}
+    \item os múltiplos de 7 entre 100 e 1000 que \textbf{não} são múltiplos de 3 \hfill (Exercício 5.25)
+  \end{enumerate}
+  \vspace{1ex}
+  \footnotesize Depois confira com as soluções do site.
+\end{frame}
+
+\exercicios{5}{%
+  \begin{itemize}\small
+    \item Compreensão: \textbf{5.7, 5.8, 5.9, 5.10}
+    \item Somar e multiplicar listas: \textbf{5.11, 5.12}
+    \item Fatiamento: \textbf{5.13, 5.14, 5.15, 5.16}
+  \end{itemize}}
+
+\resumo{
+  \item Compreensão: \texttt{[expr for x in seq if cond]}
+  \item \texttt{+} concatena; \texttt{*} repete
+  \item Fatias: \texttt{lista[ini:fim:passo]} (fim exclusivo); \texttt{[::-1]} inverte
+  \item Fatias à esquerda do \texttt{=} modificam trechos da lista
+  \item Próxima aula: operações avançadas, cópias e listas como parâmetros
+}
+
+\end{document}

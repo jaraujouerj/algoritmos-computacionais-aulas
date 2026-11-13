@@ -1,0 +1,235 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{04}{Pensamento Algorítmico}{Algoritmos, refinamentos sucessivos, fluxogramas e pseudocódigo}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Linguagem de programação e algoritmos (Cap.~2.1--2.2)
+    \item Um algoritmo computacional simples: a busca no dicionário (2.3)
+    \item Refinamentos sucessivos
+    \item Fluxogramas (2.4)
+    \item Pseudocódigo (2.5)
+    \item \textbf{Prática:} algoritmos no papel
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Algoritmo: passos não ambíguos}
+  \begin{block}{O computador executa \emph{exatamente} o que você escreve}
+    Ele não ``entende a intenção''. Cada passo precisa ser preciso e executável.
+  \end{block}
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+    \textbf{Ambíguo}
+    \begin{itemize}
+      \item ``Misture bem''
+      \item ``Espere um pouco''
+      \item ``Ache a palavra''
+    \end{itemize}
+    \column{0.48\textwidth}
+    \textbf{Preciso}
+    \begin{itemize}
+      \item ``Misture por 30 segundos''
+      \item ``Espere 5 minutos''
+      \item ``Abra o livro na página do meio e compare''
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Um algoritmo computacional: achar uma palavra no dicionário}
+  \textbf{Primeira tentativa (força bruta):}
+  \begin{enumerate}
+    \item Abra na primeira página
+    \item Se a palavra estiver ali, pare
+    \item Senão, vire a página e volte ao passo 2
+  \end{enumerate}
+  Funciona, mas é lento: um dicionário com 1000 páginas pode exigir \(1000\) passos.
+  \vspace{1ex}
+  \begin{alertblock}{Pergunta}
+    Como uma pessoa \emph{de verdade} procura no dicionário? Isso explora o fato de ele estar \textbf{ordenado}.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{Refinamento: a busca binária}
+  \begin{enumerate}
+    \item Abra o dicionário no meio
+    \item Se a palavra está na página, \alert{pare}
+    \item Se a palavra vem \emph{antes} da página atual, descarte a metade de depois
+    \item Se vem \emph{depois}, descarte a metade de antes
+    \item Repita com a metade que sobrou
+    \item Se não sobrar nenhuma página, a palavra \alert{não existe}
+  \end{enumerate}
+  \vspace{1ex}
+  \begin{exampleblock}{Eficiência}
+    Cada passo divide o problema por 2: com 1000 páginas bastam \(\lceil\log_2 1000\rceil = 10\) passos.
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Refinamentos sucessivos}
+  Estratégia para problemas grandes: começar com passos de \textbf{alto nível} e detalhar cada um.
+  \vspace{1ex}
+  \begin{columns}[T]
+    \column{0.45\textwidth}
+    \textbf{Nível 1}
+    \begin{enumerate}
+      \item Ler as notas
+      \item Calcular a média
+      \item Informar a situação
+    \end{enumerate}
+    \column{0.52\textwidth}
+    \textbf{Nível 2 (refinando o passo 3)}
+    \begin{enumerate}
+      \item[3.1] Se média \(\ge 7\): ``aprovado''
+      \item[3.2] Senão, se média \(\ge 4\): ``prova final''
+      \item[3.3] Senão: ``reprovado''
+    \end{enumerate}
+  \end{columns}
+  \vspace{1ex}
+  \footnotesize Só quando todos os passos são simples o suficiente é que escrevemos o código.
+\end{frame}
+
+\begin{frame}{Fluxogramas: símbolos básicos}
+  \begin{center}
+  \begin{tikzpicture}[
+      term/.style={draw=uerjazul,rounded corners=8pt,minimum width=2.6cm,minimum height=0.8cm,fill=uerjcinza,font=\small},
+      proc/.style={draw=uerjazul,minimum width=2.6cm,minimum height=0.8cm,fill=uerjcinza,font=\small},
+      io/.style={draw=uerjazul,trapezium,trapezium left angle=70,trapezium right angle=110,minimum width=2.6cm,minimum height=0.8cm,fill=uerjcinza,font=\small},
+      dec/.style={draw=uerjazul,diamond,aspect=2,fill=uerjcinza,font=\small}]
+    \node[term] (a) at (0,0) {Início / Fim};
+    \node[proc] (b) at (4,0) {Processamento};
+    \node[io]   (c) at (8,0) {Entrada / Saída};
+    \node[dec]  (d) at (12,0) {Decisão?};
+  \end{tikzpicture}
+  \end{center}
+  \begin{itemize}
+    \item Setas indicam o \textbf{fluxo} de execução
+    \item Decisão tem duas saídas: \emph{sim} e \emph{não}
+    \item Um fluxograma bom cabe em uma página e se lê de cima para baixo
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Exemplo: situação do aluno}
+  \begin{center}
+  \begin{tikzpicture}[scale=0.68,transform shape,node distance=0.7cm,
+      term/.style={draw=uerjazul,rounded corners=8pt,minimum width=2.4cm,minimum height=0.6cm,fill=uerjcinza,font=\footnotesize},
+      proc/.style={draw=uerjazul,minimum width=3.3cm,minimum height=0.6cm,fill=uerjcinza,font=\footnotesize},
+      dec/.style={draw=uerjazul,diamond,aspect=3,fill=uerjcinza,font=\footnotesize,inner sep=1pt},
+      seta/.style={-{Stealth},thick,uerjazul}]
+    \node[term] (ini) {Início};
+    \node[proc,below=of ini] (le) {Ler nota1 e nota2};
+    \node[proc,below=of le] (m) {media $\leftarrow$ (nota1 + nota2)/2};
+    \node[dec,below=of m] (d1) {media $\ge$ 7?};
+    \node[proc,right=2.2cm of d1] (ap) {``Aprovado''};
+    \node[dec,below=of d1] (d2) {media $\ge$ 4?};
+    \node[proc,right=2.2cm of d2] (pf) {``Prova final''};
+    \node[proc,below=of d2] (rp) {``Reprovado''};
+    \node[term,right=2.2cm of rp] (fim) {Fim};
+    \draw[seta] (ini)--(le); \draw[seta] (le)--(m); \draw[seta] (m)--(d1);
+    \draw[seta] (d1)--node[above,font=\scriptsize]{sim}(ap);
+    \draw[seta] (d1)--node[left,font=\scriptsize]{não}(d2);
+    \draw[seta] (d2)--node[above,font=\scriptsize]{sim}(pf);
+    \draw[seta] (d2)--node[left,font=\scriptsize]{não}(rp);
+    \draw[seta] (rp)--(fim);
+    \draw[seta] (ap) -- ++(2.3,0) |- (fim);
+    \draw[seta] (pf) -- ++(2.3,0) |- (fim);
+  \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Pseudocódigo}
+  Descrição \textbf{textual e estruturada} do algoritmo, sem a sintaxe rígida de uma linguagem.
+  \vspace{1ex}
+  \begin{columns}[T]
+    \column{0.52\textwidth}
+    \begin{block}{Pseudocódigo}
+      \ttfamily\footnotesize
+      LEIA nota1, nota2\\
+      media $\leftarrow$ (nota1 + nota2) / 2\\
+      SE media $\ge$ 7 ENTÃO\\
+      \hspace*{1em}ESCREVA ``Aprovado''\\
+      SENÃO SE media $\ge$ 4 ENTÃO\\
+      \hspace*{1em}ESCREVA ``Prova final''\\
+      SENÃO\\
+      \hspace*{1em}ESCREVA ``Reprovado''
+    \end{block}
+    \column{0.44\textwidth}
+    \begin{itemize}
+      \item Foco na lógica, não na sintaxe
+      \item Cada comando é uma ação clara
+      \item Indentação mostra a estrutura
+      \item Depois é traduzido para Python quase linha a linha
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Do pseudocódigo ao Python}
+\begin{lstlisting}
+nota1 = float(input("Primeira nota: "))
+nota2 = float(input("Segunda nota: "))
+media = (nota1 + nota2) / 2
+if media >= 7:
+    print("Aprovado")
+elif media >= 4:
+    print("Prova final")
+else:
+    print("Reprovado")
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{input} lê texto; \texttt{float(\ldots)} converte para número
+    \item \texttt{elif} = ``senão se''
+  \end{itemize}
+  \fonte{code/Cap3/prog.3.3\_calcula\_final\_reprova.py}
+\end{frame}
+
+\begin{frame}{Prática: uma máquina só de somar e subtrair}
+  Imagine uma máquina que só sabe \textbf{somar} e \textbf{subtrair}, e comparar com zero.
+
+  \begin{exampleblock}{Desafio (Exercícios 2.4 a 2.6)}
+    Escreva, em pseudocódigo, um algoritmo para
+    \begin{enumerate}
+      \item multiplicar \(a \times b\)
+      \item calcular \(a^b\)
+      \item dividir \(a \div b\) (quociente e resto)
+    \end{enumerate}
+  \end{exampleblock}
+  \textbf{Dica para a multiplicação:} \(a\times b = a + a + \cdots + a\) (\(b\) vezes). Use um contador e um acumulador.
+  \vspace{1ex}
+
+  \footnotesize Depois desenhe os fluxogramas (Exercício 2.7).
+\end{frame}
+
+\begin{frame}[fragile]{Solução esperada: multiplicação por somas}
+\begin{lstlisting}
+a = int(input("a = "))
+b = int(input("b = "))
+produto = 0
+contador = 0
+while contador < b:
+    produto = produto + a
+    contador = contador + 1
+print(a, "x", b, "=", produto)
+\end{lstlisting}
+  \begin{itemize}
+    \item Já usamos uma repetição (\texttt{while}); ela será estudada na Aula 8
+    \item Teste na mão: \(a=3\), \(b=4\) gera 0, 3, 6, 9, 12
+  \end{itemize}
+\end{frame}
+
+\exercicios{2}{%
+  \begin{itemize}\small
+    \item Algoritmos do dia a dia: \textbf{2.1, 2.2}
+    \item Busca binária e máquina de somar: \textbf{2.3 a 2.6}
+    \item Fluxogramas: \textbf{2.7}
+    \item Busca binária mais enxuta: \textbf{2.19}
+  \end{itemize}}
+
+\resumo{
+  \item Algoritmo: passos finitos, precisos e sem ambiguidade
+  \item Refinamentos sucessivos: de passos gerais a passos simples
+  \item Fluxograma (visual) e pseudocódigo (textual) servem para pensar \emph{antes} de programar
+  \item Próxima aula: identificadores, dados e tipos em Python
+}
+
+\end{document}

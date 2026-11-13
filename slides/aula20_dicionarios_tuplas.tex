@@ -1,0 +1,199 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{20}{Dicionários e Tuplas}{Dados associativos e sequências imutáveis}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item O problema de buscar por \emph{nome}, não por posição
+    \item \textbf{Dicionários}: pares chave--valor (Cap.~5.12)
+    \item \textbf{Tuplas}: sequências imutáveis (5.13)
+    \item Tuplas como chaves; listas de tuplas; dicionários de dicionários
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Listas ou dicionários?}
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+    \begin{block}{Lista}
+      Acesso por \textbf{posição} (índice inteiro): \texttt{notas[2]}.\\
+      Boa para sequências de itens do mesmo tipo.
+    \end{block}
+    \column{0.48\textwidth}
+    \begin{exampleblock}{Dicionário}
+      Acesso por \textbf{chave} (nome, código\ldots): \texttt{turma['João']}.\\
+      Boa para associar informações.
+    \end{exampleblock}
+  \end{columns}
+  \vspace{1.5ex}
+  Exemplos do dia a dia: agenda de telefones, tabela de preços, matrícula \(\to\) nome, estado \(\to\) sigla, elemento químico \(\to\) massa atômica.
+\end{frame}
+
+\begin{frame}[fragile]{Criando e consultando dicionários}
+\begin{lstlisting}
+turma = {'Linus': 123456, 'João': 102344,
+         'Dennis': 654321, 'Ada': 321456}
+print(turma['João'])        # 102344
+print(turma)                # {'Linus': 123456, 'João': 102344, ...}
+turma['Grace'] = 777777     # acrescenta / altera
+print(len(turma))           # 5
+\end{lstlisting}
+  \begin{itemize}
+    \item Sintaxe: \texttt{\{chave: valor, \ldots\}}; consulta com colchetes
+    \item Atribuir a uma chave \emph{nova} cria o par; a uma chave \emph{existente} altera o valor
+    \item Chave inexistente na consulta \(\Rightarrow\) \texttt{KeyError}
+  \end{itemize}
+  \fonte{code/Cap5/prog.5.32\_testadic.py}
+\end{frame}
+
+\begin{frame}[fragile]{Construindo um dicionário aos poucos}
+\begin{lstlisting}
+filmes = {}                                   # dicionário vazio
+filmes[1975] = 'Em Busca do Cálice Sagrado'
+filmes[1979] = 'A Vida de Brian'
+filmes[1983] = 'O Sentido da Vida'
+print(filmes)
+\end{lstlisting}
+\begin{lstlisting}[style=saida,basicstyle=\ttfamily\scriptsize]
+{1975: 'Em Busca do Cálice Sagrado', 1979: 'A Vida de Brian', 1983: 'O Sentido da Vida'}
+\end{lstlisting}
+  \begin{itemize}
+    \item Chaves podem ser números, strings ou tuplas (qualquer tipo \emph{imutável})
+    \item Valores podem ser \emph{qualquer} coisa: números, listas, outros dicionários
+  \end{itemize}
+  \fonte{code/Cap5/prog.5.33\_filmesmp.py}
+\end{frame}
+
+\begin{frame}[fragile]{Operações úteis}
+\begin{lstlisting}
+d = {'amazonas': 'AM', 'rio de janeiro': 'RJ'}
+print('amazonas' in d)              # True (testa as CHAVES)
+print(d.get('acre', '?'))           # '?'  (sem KeyError)
+for chave in d:                     # percorre as chaves
+    print(chave, '->', d[chave])
+for chave, valor in d.items():      # chave e valor juntos
+    print(chave, valor)
+print(list(d.keys()), list(d.values()))
+del d['amazonas']
+\end{lstlisting}
+  \begin{itemize}
+    \item Exercícios 5.29 e 5.30: dicionário de estados \(\to\) siglas; versão \emph{case-insensitive} (use \texttt{.lower()})
+  \end{itemize}
+  \fonte{code/Cap5/prog.5.d\_testadic1.py}
+\end{frame}
+
+\begin{frame}[fragile]{Padrão: contar ocorrências}
+\begin{lstlisting}
+texto = "abracadabra"
+contagem = {}
+for letra in texto:
+    if letra in contagem:
+        contagem[letra] += 1
+    else:
+        contagem[letra] = 1
+print(contagem)    # {'a': 5, 'b': 2, 'r': 2, 'c': 1, 'd': 1}
+
+# versão curta
+contagem = {}
+for letra in texto:
+    contagem[letra] = contagem.get(letra, 0) + 1
+\end{lstlisting}
+  \small Frequências de palavras, defeitos por máquina, votos por candidato\ldots Tudo isso é este padrão.
+\end{frame}
+
+\begin{frame}[fragile]{Tuplas: sequências imutáveis}
+\begin{lstlisting}
+planetas = ('Mercúrio', 'Vênus', 'Terra', 'Marte',
+            'Saturno', 'Júpiter', 'Urano', 'Netuno')
+print(planetas[2:5])        # ('Terra', 'Marte', 'Saturno')
+print(planetas[:3])
+print(len(planetas))
+planetas[0] = 'Sol'         # TypeError: não suporta atribuição
+\end{lstlisting}
+  \begin{itemize}
+    \item Sintaxe com parênteses; indexação e fatiamento iguais aos das listas
+    \item \alert{Imutável}: não há \texttt{append}, \texttt{remove}, atribuição por índice
+    \item Tupla de um elemento: \texttt{(5,)} (a vírgula é obrigatória)
+  \end{itemize}
+  \fonte{code/Cap5/prog.5.e\_ipbytuplas.py}
+\end{frame}
+
+\begin{frame}{Para que servem tuplas?}
+  \begin{itemize}
+    \item Agrupar valores relacionados que \textbf{não devem mudar}: coordenadas \((x,y)\), data \((d,m,a)\), cor \((r,g,b)\)
+    \item \textbf{Retorno múltiplo} de funções (Aula 11): \texttt{return x, y} devolve uma tupla
+    \item Podem ser \textbf{chaves de dicionário} (listas não podem, pois são mutáveis)
+    \item Mais leves e seguras: protegem contra alterações acidentais
+  \end{itemize}
+  \begin{exampleblock}{Desempacotamento}
+    \texttt{x, y = (3, 4)} \hspace{2em} \texttt{a, b = b, a} (troca de valores)\\
+    \texttt{nome, *resto = ('Ana', 10, 8.5)} \hspace{1em} \footnotesize(resto é uma lista)
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}[fragile]{Combinando: dicionário de tuplas}
+\begin{lstlisting}
+lat_galeao = (22, 48, 34);  long_galeao = (43, 15, 0)
+aeroporto_galeao = ('Galeão', lat_galeao, long_galeao)
+lat_garulhos = (23, 26, 6); long_garulhos = (46, 28, 22)
+aeroporto_garulhos = ('Guarulhos', lat_garulhos, long_garulhos)
+aeroportos = {'Rio': aeroporto_galeao,
+              'São Paulo': aeroporto_garulhos}
+for cidade in aeroportos:
+    nome, lat, lon = aeroportos[cidade]
+    print(f"Aeroporto {cidade}: {nome}")
+    print(f"  Latitude: {lat[0]}º{lat[1]}'{lat[2]}\"")
+\end{lstlisting}
+  \small Estruturas aninhadas permitem modelar dados reais. Exercício 5.33 (aeroportos com tuplas).\\
+  \fonte{code/Cap5/prog.5.37\_aeroportos.py}
+\end{frame}
+
+\begin{frame}[fragile]{Registros: lista de dicionários}
+\begin{lstlisting}
+pecas = [
+    {'id': 1000, 'maquina': 'M1', 'tempo': 31.6, 'status': 'Aprovado'},
+    {'id': 1001, 'maquina': 'M1', 'tempo': 34.5, 'status': 'Aprovado'},
+    {'id': 1002, 'maquina': 'M2', 'tempo': 24.9, 'status': 'Descarte'},
+]
+descartadas = [p for p in pecas if p['status'] == 'Descarte']
+tempo_medio = sum(p['tempo'] for p in pecas) / len(pecas)
+
+por_maquina = {}
+for p in pecas:
+    por_maquina.setdefault(p['maquina'], []).append(p['tempo'])
+\end{lstlisting}
+  \small Uma lista de dicionários é uma ``tabela com colunas nomeadas'': a ideia que o \textbf{Pandas} formaliza (Aulas 28 e 29).
+\end{frame}
+
+\begin{frame}{Resumo comparativo}
+  \centering\small
+  \begin{tabular}{lccc}
+    \toprule
+    & \textbf{Lista} & \textbf{Tupla} & \textbf{Dicionário}\\
+    \midrule
+    Sintaxe & \texttt{[1, 2]} & \texttt{(1, 2)} & \texttt{\{'a': 1\}}\\
+    Acesso & índice & índice & chave\\
+    Mutável? & sim & \alert{não} & sim\\
+    Ordenada? & sim & sim & mantém ordem de inserção\\
+    Pode ser chave? & não & sim & não\\
+    Uso típico & coleção de itens & registro fixo & associação chave--valor\\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\exercicios{5}{%
+  \begin{itemize}\small
+    \item Dicionários: \textbf{5.29} (estados e siglas), \textbf{5.30} (sem diferenciar maiúsculas)
+    \item Tuplas: \textbf{5.31} (tupla de divisíveis por 7), \textbf{5.32} (\(\pi\) com lista de tuplas), \textbf{5.33} (aeroportos)
+  \end{itemize}}
+
+\resumo{
+  \item Dicionário: coleção de pares chave--valor; acesso rápido por chave
+  \item Tupla: sequência imutável; ótima para registros fixos e retornos múltiplos
+  \item Estruturas se combinam: listas de dicionários, dicionários de tuplas\ldots
+  \item Próxima aula: NumPy
+}
+
+\end{document}

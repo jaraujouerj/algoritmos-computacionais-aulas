@@ -1,0 +1,191 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{12}{Organização e Módulos}{Módulos em Python, reuso e estruturação de programas maiores}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item O que é um módulo? (Cap.~4.2)
+    \item Formas de importar: \texttt{import}, \texttt{from}, \texttt{as}
+    \item Criando seu próprio módulo
+    \item \texttt{if \_\_name\_\_ == "\_\_main\_\_"}
+    \item Estruturando um programa maior (4.6)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Módulos: bibliotecas de funções}
+  \begin{columns}[T]
+    \column{0.52\textwidth}
+    \begin{itemize}
+      \item Um \textbf{módulo} é um arquivo \texttt{.py} com funções e constantes prontas
+      \item Python vem com a \emph{biblioteca padrão}: \texttt{math}, \texttt{random}, \texttt{statistics}, \texttt{datetime}, \texttt{os}\ldots
+      \item Milhares de módulos de terceiros: \texttt{numpy}, \texttt{pandas}, \texttt{matplotlib}\ldots
+    \end{itemize}
+    \column{0.44\textwidth}
+    \begin{exampleblock}{Filosofia}
+      ``Não reinvente a roda'': antes de escrever, procure se já existe no manual do Python.
+    \end{exampleblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Três formas de importar}
+\begin{lstlisting}
+import math                       # usa math.sin(...)
+print(math.sin(math.pi / 2))      # 1.0
+
+from math import radians, sin     # traz só estes nomes
+print(sin(radians(30)))           # 0.49999999999999994
+
+import math as m                  # apelido curto
+print(m.sqrt(16))                 # 4.0
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{import math}: o prefixo \texttt{math.} deixa claro \emph{de onde} vem cada função
+    \item \texttt{from \ldots import \ldots}: nomes diretos, mas risco de \emph{colisão} com seus nomes
+    \item Evite \texttt{from math import *}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Exemplo: tabela de senos e cossenos}
+\begin{lstlisting}
+from math import radians, sin, cos
+
+print('{:>9}{:>9}{:>9}{:>9}'.format('Graus', 'Radianos',
+                                    'Seno', 'Cosseno'))
+for graus in range(0, 361, 30):
+    rad = radians(graus)
+    print('{:>9.2f}{:>9.2f}{:>9.2f}{:>9.2f}'.format(
+        graus, rad, sin(rad), cos(rad)))
+\end{lstlisting}
+  \begin{itemize}
+    \item Exercício 4.1: expandir a tabela para incluir a tangente (\texttt{tan})
+    \item Exercício 4.4: pesquise no manual outras funções de \texttt{math}
+  \end{itemize}
+  \fonte{code/Cap4/prog.4.7\_tabela\_senos\_cossenosimport.py}
+\end{frame}
+
+\begin{frame}[fragile]{Criando seu próprio módulo}
+  Arquivo \texttt{geometria.py}:
+\begin{lstlisting}
+import math
+
+def area_circulo(raio):
+    """Área do círculo."""
+    return math.pi * raio ** 2
+
+def distancia(x1, y1, x2, y2):
+    """Distância entre dois pontos."""
+    return math.hypot(x2 - x1, y2 - y1)
+\end{lstlisting}
+  Em outro arquivo, na mesma pasta:
+\begin{lstlisting}
+import geometria
+print(geometria.area_circulo(5))
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{\_\_name\_\_}: módulo ou programa?}
+\begin{lstlisting}
+# fim de geometria.py
+def main():
+    print("Teste:", area_circulo(1), distancia(0, 0, 3, 4))
+
+if __name__ == "__main__":
+    main()
+\end{lstlisting}
+  \begin{itemize}
+    \item Executando \texttt{python geometria.py}: \texttt{\_\_name\_\_} vale \texttt{"\_\_main\_\_"} e o teste roda
+    \item Com \texttt{import geometria}: \texttt{\_\_name\_\_} vale \texttt{"geometria"} e o teste \alert{não} roda
+    \item Assim o mesmo arquivo serve como \textbf{programa} e como \textbf{biblioteca}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Estruturando programas maiores}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{block}{Camadas sugeridas}
+      \begin{enumerate}\small
+        \item \textbf{Entrada/saída}: lê do usuário/arquivos e imprime
+        \item \textbf{Regras} (cálculos): funções puras
+        \item \textbf{Dados}: listas, dicionários, arquivos
+      \end{enumerate}
+    \end{block}
+    \column{0.47\textwidth}
+    \begin{block}{Organização de arquivos}
+      \ttfamily\footnotesize
+      projeto/\\
+      \hspace*{1em}principal.py\\
+      \hspace*{1em}calculos.py\\
+      \hspace*{1em}entrada\_saida.py\\
+      \hspace*{1em}dados/
+    \end{block}
+  \end{columns}
+  \vspace{1ex}
+  Cada módulo tem \textbf{uma responsabilidade}. Isso será essencial no projeto final.
+\end{frame}
+
+\begin{frame}[fragile]{Exemplo: $\pi$ por Monte Carlo em módulos}
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+    \textbf{\texttt{montecarlo.py}}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+import random as r
+import math as m
+
+def gera_pontos():
+    return r.random(), r.random()
+
+def dentro(x, y):
+    return m.hypot(x, y) < 1
+
+def estima_pi(n):
+    cont = 0
+    for _ in range(n):
+        x, y = gera_pontos()
+        if dentro(x, y):
+            cont += 1
+    return 4 * cont / n
+\end{lstlisting}
+    \column{0.48\textwidth}
+    \textbf{\texttt{principal.py}}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+import montecarlo
+
+n = int(input("Pontos: "))
+pi = montecarlo.estima_pi(n)
+print("pi aprox.", pi)
+\end{lstlisting}
+    \vspace{1ex}
+    \footnotesize Os testes e a entrada/saída ficam fora do módulo de cálculo.\\
+    \fonte{code/Cap4/prog.4.23\_calcula\_pi\_main.py}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Onde procurar ajuda}
+  \begin{itemize}
+    \item \texttt{help(math)} e \texttt{dir(math)} no interpretador
+    \item Documentação oficial: \texttt{docs.python.org/pt-br/3/library/}
+    \item Mensagem \texttt{ModuleNotFoundError}: o módulo não está instalado ou o arquivo não está na mesma pasta
+    \item Instalar pacotes de terceiros: \texttt{pip install nome}
+  \end{itemize}
+  \begin{exampleblock}{Atividade}
+    Crie um módulo \texttt{conversoes.py} com as funções \texttt{celsius\_para\_fahrenheit}, \texttt{fahrenheit\_para\_celsius} e \texttt{km\_para\_milhas}. Importe-o em outro arquivo e imprima uma tabela.
+  \end{exampleblock}
+\end{frame}
+
+\exercicios{4}{%
+  \begin{itemize}\small
+    \item Módulos: \textbf{4.1} (tabela com tangente), \textbf{4.2} (raízes quadradas), \textbf{4.3} (quadrado e cubo), \textbf{4.4} (funções de \texttt{math})
+  \end{itemize}}
+
+\resumo{
+  \item Módulo = arquivo \texttt{.py} reutilizável; \texttt{import} o traz para o seu programa
+  \item \texttt{import x}, \texttt{from x import y}, \texttt{import x as z}
+  \item Todo arquivo pode ser módulo; \texttt{if \_\_name\_\_ == "\_\_main\_\_"} protege o código de teste
+  \item Programas grandes: módulos com responsabilidades claras
+  \item Próxima aula: \texttt{math}, \texttt{random} e tratamento de erros
+}
+
+\end{document}

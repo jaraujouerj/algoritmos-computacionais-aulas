@@ -1,0 +1,161 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{31}{Implementação 1}{Estrutura básica do programa, funções principais e dados}
+
+\begin{document}
+\capa
+
+\begin{frame}{Objetivo da aula}
+  \begin{itemize}
+    \item Construir o \textbf{esqueleto} do programa: arquivos, funções principais e estruturas de dados
+    \item Ter, ao final, uma versão que \alert{executa} do início ao fim (mesmo que incompleta)
+    \item Feedback contínuo do professor durante a aula
+  \end{itemize}
+  \begin{block}{Princípio: desenvolvimento incremental}
+    Escreva um pouco, \textbf{execute}, teste, corrija; só então avance. Nunca escreva 200 linhas antes de rodar pela primeira vez.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Roteiro de implementação}
+  \begin{enumerate}
+    \item Crie a \textbf{pasta e os arquivos} previstos na especificação
+    \item Escreva os \textbf{esqueletos das funções} (nome, parâmetros, docstring, \texttt{pass})
+    \item Defina a \textbf{estrutura de dados} central e crie dados de exemplo \emph{no próprio código}
+    \item Implemente a \textbf{funcionalidade mais simples} de ponta a ponta (entrada \(\to\) cálculo \(\to\) saída)
+    \item Escreva o \texttt{main()} com o menu/fluxo geral
+    \item Teste, \textbf{integre} o trabalho dos integrantes e repita
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]{Passo 2: esqueleto de funções}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+def cadastra_insumo(estoque, nome, unidade, preco, qtd, minimo):
+    """Acrescenta um insumo ao estoque (dicionário). Devolve True se criou."""
+    pass
+
+def baixa_estoque(estoque, nome, qtd):
+    """Retira qtd do estoque. Levanta ValueError se faltar material."""
+    pass
+
+def custo_total(estoque):
+    """Soma preco * qtd de todos os insumos."""
+    pass
+
+def insumos_em_alerta(estoque):
+    """Lista os nomes com qtd menor ou igual ao mínimo."""
+    pass
+\end{lstlisting}
+  \small Nomes, parâmetros e \emph{docstrings} já definem o \textbf{contrato} de cada função. Os integrantes podem trabalhar em funções diferentes.
+\end{frame}
+
+\begin{frame}[fragile]{Passo 3 e 4: dados e primeira funcionalidade}
+\begin{lstlisting}
+def custo_total(estoque):
+    """Soma preco * qtd de todos os insumos."""
+    total = 0.0
+    for dados in estoque.values():
+        total += dados["preco"] * dados["qtd"]
+    return total
+
+def main():
+    estoque = {
+        "cimento": {"unidade": "saco", "preco": 38.5, "qtd": 120, "minimo": 30},
+        "areia":   {"unidade": "m3",   "preco": 95.0, "qtd": 15,  "minimo": 10},
+    }
+    print(f"Custo total em estoque: R$ {custo_total(estoque):.2f}")
+
+main()
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Passo 5: o menu principal}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+def mostra_menu():
+    print("\n1 - Cadastrar insumo\n2 - Baixar estoque")
+    print("3 - Custo total\n4 - Alertas\n0 - Sair")
+
+def main():
+    estoque = {}
+    while True:
+        mostra_menu()
+        opcao = input("Opção: ").strip()
+        if opcao == "1":
+            ...      # le dados e chama cadastra_insumo
+        elif opcao == "3":
+            print(f"Custo: R$ {custo_total(estoque):.2f}")
+        elif opcao == "0":
+            break
+        else:
+            print("Opção inválida.")
+\end{lstlisting}
+  \small Cada opção do menu chama uma função: \texttt{main} só \emph{coordena}.
+\end{frame}
+
+\begin{frame}{Dividindo o trabalho em equipe}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{block}{Boas práticas}
+      \begin{itemize}\small
+        \item Cada integrante assume \textbf{funções ou módulos} distintos
+        \item Combinem o \textbf{contrato} (parâmetros e retorno) antes de escrever
+        \item Evitem editar o mesmo arquivo ao mesmo tempo
+        \item Integrem \emph{no mesmo dia}, não na véspera
+      \end{itemize}
+    \end{block}
+    \column{0.5\textwidth}
+    \begin{alertblock}{Armadilhas}
+      \begin{itemize}\small
+        \item Cada um com sua versão ``do arquivo''
+        \item Variáveis globais compartilhadas entre módulos
+        \item Funções que leem do teclado \emph{e} calculam (difíceis de testar)
+        \item Nomes diferentes para a mesma coisa
+      \end{itemize}
+    \end{alertblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Estruturas de dados: escolha consciente}
+  \centering\small
+  \begin{tabular}{p{4.6cm}p{6.6cm}}
+    \toprule
+    \textbf{Preciso de\ldots} & \textbf{Use}\\
+    \midrule
+    uma coleção ordenada de itens iguais & lista\\
+    buscar por nome/código & dicionário\\
+    registro fixo (coordenada, data) & tupla\\
+    muitas operações numéricas & \texttt{np.array}\\
+    tabela com colunas nomeadas & lista de dicionários ou \texttt{DataFrame}\\
+    grade/tabuleiro & lista de listas (matriz)\\
+    \bottomrule
+  \end{tabular}
+  \vspace{1ex}
+
+  \footnotesize ``Uma estrutura de dados mal escolhida pode arruinar o melhor algoritmo.'' (Cap.~9.1)
+\end{frame}
+
+\begin{frame}{Atividade: ao final desta aula}
+  Cada grupo deve mostrar ao professor:
+  \begin{itemize}
+    \item A \textbf{estrutura de pastas/arquivos} criada
+    \item Os \textbf{esqueletos das funções} com docstrings
+    \item Pelo menos \textbf{uma funcionalidade} completa funcionando (entrada \(\to\) saída)
+    \item O \texttt{main()} com o fluxo geral (menu ou sequência de passos)
+  \end{itemize}
+  \begin{exampleblock}{Feedback do professor}
+    Verificará: funções coesas? Nomes claros? Dados bem escolhidos? O programa \emph{executa}?
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Checklist de implementação 1}
+  \small
+  \begin{tabular}{@{}cl@{}}
+    $\square$ & O programa roda sem erro do início ao fim?\\
+    $\square$ & Cada função tem nome, parâmetros e docstring?\\
+    $\square$ & Há uma função \texttt{main()} e o programa está dividido em módulos/funções?\\
+    $\square$ & A estrutura de dados central está definida?\\
+    $\square$ & Uma funcionalidade essencial está completa?\\
+    $\square$ & O que falta está listado (para a Aula 32)?\\
+  \end{tabular}
+\end{frame}
+
+\end{document}

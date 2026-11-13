@@ -1,0 +1,245 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{10}{Subalgoritmos}{Funções, fluxo de execução e return}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Por que dividir um programa em partes? (Cap.~4)
+    \item Fluxo de execução (4.1)
+    \item Definindo e chamando funções (4.3)
+    \item Funções sem retorno: procedimentos
+    \item Funções com retorno: \texttt{return}
+    \item Documentação com \emph{docstrings}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Dividir para conquistar}
+  \begin{columns}[T]
+    \column{0.55\textwidth}
+    \begin{itemize}
+      \item Um problema grande vira \textbf{vários problemas pequenos}
+      \item Cada parte é um \textbf{subalgoritmo}: em Python, uma \alert{função}
+      \item Benefícios:
+      \begin{itemize}\small
+        \item \textbf{reuso}: escreve uma vez, usa várias
+        \item \textbf{legibilidade}: nomes explicam o que cada parte faz
+        \item \textbf{teste}: verifica-se cada função isoladamente
+      \end{itemize}
+    \end{itemize}
+    \column{0.42\textwidth}
+    \begin{exampleblock}{Já usamos funções!}
+      \texttt{print()}, \texttt{input()}, \texttt{int()}, \texttt{range()}, \texttt{len()}, \texttt{type()}\ldots\\
+      Agora vamos \emph{criar} as nossas.
+    \end{exampleblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Definindo e chamando uma função}
+\begin{lstlisting}
+def imprime_linha():
+    print('**********')
+
+imprime_linha()
+imprime_linha()
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+**********
+**********
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{def nome(parâmetros):} \(\to\) \alert{define} (apenas guarda; ainda não executa)
+    \item \texttt{nome()} \(\to\) \alert{chama} (executa o corpo)
+    \item O corpo é um bloco indentado
+  \end{itemize}
+  \fonte{code/Cap4/prog.4.8\_imprimeb.py}
+\end{frame}
+
+\begin{frame}[fragile]{Fluxo de execução}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+\begin{lstlisting}
+def a():
+    print("início de a")
+    b()
+    print("fim de a")
+
+def b():
+    print("em b")
+
+print("começo")
+a()
+print("fim")
+\end{lstlisting}
+    \column{0.45\textwidth}
+    \textbf{Ordem de execução}
+    \begin{enumerate}\small
+      \item as definições \texttt{def} são lidas (nada executa)
+      \item \texttt{print("começo")}
+      \item chama \texttt{a()} \(\to\) pula para o corpo
+      \item chama \texttt{b()} \(\to\) pula de novo
+      \item \texttt{b} termina \(\to\) volta a \texttt{a}
+      \item \texttt{a} termina \(\to\) volta ao programa
+      \item \texttt{print("fim")}
+    \end{enumerate}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Funções com parâmetros}
+\begin{lstlisting}
+def imprime_linha(n):
+    print('*' * n)
+
+imprime_linha(5)
+imprime_linha(20)
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+*****
+********************
+\end{lstlisting}
+  \begin{itemize}
+    \item \textbf{Parâmetro}: nome na definição (\texttt{n}); \textbf{argumento}: valor na chamada (\texttt{5})
+    \item \texttt{'*' * n} repete a string \(n\) vezes
+    \item Exercício 4.5: usar funções para desenhar outras figuras com asteriscos
+  \end{itemize}
+  \fonte{code/Cap4/prog.4.9\_imprimenb.py}
+\end{frame}
+
+\begin{frame}[fragile]{Funções sem retorno (procedimentos)}
+\begin{lstlisting}
+def conceito(nota):
+    """Imprime o conceito correspondente à nota."""
+    if nota >= 9:
+        print("A")
+    elif nota >= 7:
+        print("B")
+    elif nota >= 5:
+        print("C")
+    else:
+        print("D")
+
+conceito(8.5)
+\end{lstlisting}
+  \begin{itemize}
+    \item A função \alert{faz algo} (imprime) mas não devolve valor ao chamador
+    \item Exercício 4.7 do livro (nota \(\to\) conceito)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Funções com retorno: \texttt{return}}
+\begin{lstlisting}
+def quadrado(x):
+    return x * x
+
+a = quadrado(7)
+print(a)                   # 49
+print(quadrado(3) + 1)     # 10
+\end{lstlisting}
+  \begin{alertblock}{\texttt{print} $\neq$ \texttt{return}}
+    \texttt{print} \emph{mostra} na tela; \texttt{return} \emph{devolve} o valor para quem chamou, que pode usá-lo em contas. Ao executar \texttt{return}, a função termina.
+  \end{alertblock}
+  Exercício 4.8: função que recebe um inteiro e devolve seu quadrado.
+\end{frame}
+
+\begin{frame}[fragile]{Funções matemáticas: conversão de temperaturas}
+\begin{lstlisting}
+def fahrenheit(celsius):
+    """Converte Celsius para Fahrenheit."""
+    return 9 / 5 * celsius + 32
+
+def celsius(fahrenheit):
+    """Converte Fahrenheit para Celsius."""
+    return 5 / 9 * (fahrenheit - 32)
+
+print(fahrenheit(100))     # 212.0
+print(celsius(212))        # 100.0
+\end{lstlisting}
+  \begin{itemize}
+    \item Exercícios 4.9 e 4.10; a ``ida e volta'' é um bom teste: \texttt{celsius(fahrenheit(x))} deve devolver \texttt{x}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Fatorial como função}
+\begin{lstlisting}
+def fatorial(n):
+    """Calcula o fatorial de n."""
+    fat = 1
+    for i in range(1, n + 1):
+        fat = fat * i
+    return fat
+
+n = int(input('Qual o número para calcular o fatorial? '))
+print('O fatorial de', n, 'é', fatorial(n))
+\end{lstlisting}
+  \begin{itemize}
+    \item Compare com o programa sem função (Aula 8): a lógica foi \emph{empacotada} com um nome
+    \item Com a função pronta, calcular \(\binom{n}{k}=\dfrac{n!}{k!(n-k)!}\) é trivial
+  \end{itemize}
+  \fonte{code/Cap4/prog.4.3\_func\_fatorial2.py}
+\end{frame}
+
+\begin{frame}[fragile]{Função com várias decisões e retorno}
+\begin{lstlisting}
+import math
+
+def distancia(x1, y1, x2, y2):
+    """Distância entre os pontos (x1, y1) e (x2, y2)."""
+    return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+
+print(distancia(0, 0, 3, 4))      # 5.0
+\end{lstlisting}
+  \begin{itemize}
+    \item Exercício 4.11: implemente e teste com o triângulo 3--4--5
+    \item Funções podem chamar outras funções (inclusive de módulos importados)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Documentando: docstrings}
+\begin{lstlisting}
+def area_circulo(raio):
+    """Devolve a área do círculo de raio dado.
+
+    raio -- número não negativo, em qualquer unidade.
+    """
+    return 3.14159 * raio ** 2
+
+help(area_circulo)
+\end{lstlisting}
+  \begin{itemize}
+    \item A primeira string do corpo é a \textbf{docstring}: documenta \emph{o que} a função faz
+    \item \texttt{help()} a mostra; boa prática desde o Capítulo 9 do livro
+    \item Nomes de funções: verbos em minúsculas com \texttt{\_} (\texttt{calcula\_media})
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Atividade: de um programa longo a funções}
+  Reescreva o programa da Aula 9 (média com validação) em três funções:
+  \vspace{1ex}
+  \begin{enumerate}
+    \item \texttt{le\_nota(i)}: pede a nota \(i\) até ser válida e a devolve
+    \item \texttt{calcula\_media(soma, n)}: devolve a média
+    \item \texttt{situacao(media)}: devolve \texttt{"Aprovado"}, \texttt{"Prova final"} ou \texttt{"Reprovado"}
+  \end{enumerate}
+  \vspace{1ex}
+  \begin{block}{Critério de qualidade}
+    O programa principal deve ter menos de 10 linhas e ser \emph{legível como uma receita}.
+  \end{block}
+\end{frame}
+
+\exercicios{4}{%
+  \begin{itemize}\small
+    \item Funções sem retorno: \textbf{4.5} (figura com asteriscos), \textbf{4.6} (árvore de Natal com \texttt{for}), \textbf{4.7} (conceito)
+    \item Funções com retorno: \textbf{4.8} (quadrado), \textbf{4.9} (Fahrenheit), \textbf{4.10} (Celsius), \textbf{4.11} (distância)
+  \end{itemize}}
+
+\resumo{
+  \item Função = bloco nomeado e reutilizável: \texttt{def nome(parâmetros):}
+  \item Definir não executa; \emph{chamar} executa e depois o fluxo retorna
+  \item \texttt{return} devolve um valor; \texttt{print} apenas imprime
+  \item Docstrings documentam a função
+  \item Próxima aula: parâmetros, escopo e múltiplos retornos
+}
+
+\end{document}

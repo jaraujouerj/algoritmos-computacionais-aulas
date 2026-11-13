@@ -1,0 +1,261 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{08}{Iteração}{Laços while e for, laços contados e condições complexas}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Por que repetir? Iteração (Cap.~3.1.3 e 3.5)
+    \item O comando \texttt{while}
+    \item Laços contados com \texttt{for} e \texttt{range} (3.6)
+    \item Padrões: acumulador, contador, sentinela
+    \item Laços encaixados
+    \item Condições complexas e desafios de lógica
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Iteração: repetir um bloco}
+  \begin{columns}[T]
+    \column{0.55\textwidth}
+    \begin{itemize}
+      \item Computadores são ótimos em \textbf{repetir} tarefas sem se cansar
+      \item Somar \(1+2+\cdots+n\), processar mil medições, tabular uma função
+      \item Escrever 1000 \texttt{print}s é inviável; um laço resolve em 3 linhas
+    \end{itemize}
+    \column{0.42\textwidth}
+    \begin{block}{Dois tipos de laço}
+      \begin{itemize}\small
+        \item \texttt{while}: repete \emph{enquanto} uma condição for verdadeira
+        \item \texttt{for}: repete para cada elemento de uma sequência
+      \end{itemize}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Fluxograma do \texttt{while}}
+  \begin{center}
+  \begin{tikzpicture}[scale=0.9,transform shape,node distance=0.9cm,
+      proc/.style={draw=uerjazul,fill=uerjcinza,minimum width=2.8cm,minimum height=0.7cm,font=\small},
+      dec/.style={draw=uerjazul,diamond,aspect=2.5,fill=uerjcinza,font=\small},
+      seta/.style={-{Stealth},thick,uerjazul}]
+    \node[dec] (c) {condição?};
+    \node[proc,right=2.6cm of c] (b) {bloco do laço};
+    \node[proc,below=1.2cm of c] (f) {continua};
+    \draw[seta] ([yshift=0.8cm]c.north)--(c);
+    \draw[seta] (c)--node[above,font=\scriptsize]{verdadeira}(b);
+    \draw[seta] (b)|-([yshift=0.5cm]c.north);
+    \draw[seta] (c)--node[left,font=\scriptsize]{falsa}(f);
+  \end{tikzpicture}
+  \end{center}
+  \begin{alertblock}{Cuidado com o laço infinito}
+    Algo dentro do bloco precisa \emph{modificar} a condição; caso contrário o programa nunca termina (\texttt{Ctrl+C} interrompe).
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{while}: soma de 1 até \(n\)}
+\begin{lstlisting}
+n = int(input('Qual o número final? '))
+soma = 0
+i = 1
+while i <= n:
+    soma = soma + i
+    i = i + 1
+print('A soma de 1 até ', n, ' = ', soma)
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{soma}: \alert{acumulador} (começa em 0)
+    \item \texttt{i}: \alert{contador} (começa em 1 e cresce até ultrapassar \(n\))
+    \item Teste na mão (\(n=4\)): \(i=1,\,soma=1\); \(i=2,\,soma=3\); \(i=3,\,soma=6\); \(i=4,\,soma=10\)
+  \end{itemize}
+  \fonte{code/Cap3/prog.3.11\_soma\_numeros.py (Exercício 3.11)}
+\end{frame}
+
+\begin{frame}[fragile]{Validando a entrada}
+\begin{lstlisting}
+n = int(input('Qual o número final? '))
+if n > 0:
+    soma = 0
+    i = 1
+    while i <= n:
+        soma = soma + i
+        i = i + 1
+    print('A soma de 1 até ', n, ' = ', soma)
+else:
+    print('Use números positivos')
+\end{lstlisting}
+  \begin{itemize}
+    \item Combina \texttt{if} (validação) com \texttt{while} (cálculo)
+    \item Aviso: \texttt{n} negativo ou zero não deve gerar resultado
+  \end{itemize}
+  \fonte{code/Cap3/prog.3.12\_soma\_numeros\_v2.py}
+\end{frame}
+
+\begin{frame}[fragile]{Sentinela: repetir até o usuário mandar parar}
+\begin{lstlisting}
+n = int(input('Qual o número final? (0 para terminar) '))
+while n != 0:
+    if n > 0:
+        soma = 0
+        i = 1
+        while i <= n:
+            soma = soma + i
+            i = i + 1
+        print('A soma de 1 até ', n, ' = ', soma)
+    else:
+        print('Use números positivos')
+    n = int(input('Qual o número final? (0 para terminar) '))
+\end{lstlisting}
+  \small O valor \texttt{0} é o \alert{sentinela}. Note os \textbf{laços encaixados} e a releitura de \texttt{n} no fim.\\
+  \fonte{code/Cap3/prog.3.13\_soma\_numeros\_v3.py}
+\end{frame}
+
+\begin{frame}[fragile]{Média de números digitados (Exercício 3.12)}
+\begin{lstlisting}
+soma = 0
+quantidade = 0
+valor = float(input("Digite um valor (negativo para parar): "))
+while valor >= 0:
+    soma += valor
+    quantidade += 1
+    valor = float(input("Digite um valor (negativo para parar): "))
+if quantidade > 0:
+    print("Média:", soma / quantidade)
+else:
+    print("Nenhum valor digitado")
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{soma += valor} é o mesmo que \texttt{soma = soma + valor}
+    \item Proteja a divisão: se \texttt{quantidade} for 0, evita \texttt{ZeroDivisionError}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Laços contados: \texttt{for} e \texttt{range}}
+\begin{lstlisting}
+for i in ["Vermelho", "Verde", "Azul"]:
+    print(i)
+for i in range(1, 10):
+    print(i, end=' ')
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+Vermelho
+Verde
+Azul
+1 2 3 4 5 6 7 8 9
+\end{lstlisting}
+  \begin{center}\small
+  \begin{tabular}{ll}
+    \toprule
+    \texttt{range(5)} & 0, 1, 2, 3, 4\\
+    \texttt{range(1, 10)} & 1, 2, \ldots, 9 (o final \alert{não} entra)\\
+    \texttt{range(0, 361, 30)} & 0, 30, 60, \ldots, 360\\
+    \texttt{range(10, 0, -2)} & 10, 8, 6, 4, 2\\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \fonte{code/Cap3/prog.3.14\_cores.py, prog.3.15\_contagem.py}
+\end{frame}
+
+\begin{frame}[fragile]{Fatorial com \texttt{for}}
+\begin{lstlisting}
+n = int(input('Qual o número para calcular o fatorial? '))
+fat = 1
+for i in range(1, n+1):
+    fat = fat * i
+print('O fatorial de', n, 'é', fat)
+\end{lstlisting}
+  \begin{itemize}
+    \item \(n! = 1\times2\times\cdots\times n\); acumulador multiplicativo começa em \alert{1}, não em 0
+    \item \texttt{range(1, n+1)}: o limite superior é excluído
+    \item Compare com a soma por \texttt{while}: quando se sabe quantas vezes repetir, \texttt{for} é mais simples (Exercício 3.13)
+  \end{itemize}
+  \fonte{code/Cap3/prog.3.17\_fatorial.py}
+\end{frame}
+
+\begin{frame}[fragile]{Quando usar \texttt{for} ou \texttt{while}?}
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+    \begin{block}{\texttt{for}}
+      Número de repetições conhecido ou percorrer uma sequência.\\[0.5ex]
+      \footnotesize Tabela de 0 a 360 graus; notas de uma turma.
+    \end{block}
+    \column{0.48\textwidth}
+    \begin{block}{\texttt{while}}
+      Repetir até que algo aconteça.\\[0.5ex]
+      \footnotesize Ler até valor válido; aproximar até o erro ficar pequeno.
+    \end{block}
+  \end{columns}
+  \vspace{1.5ex}
+  \texttt{break} sai do laço; \texttt{continue} pula para a próxima volta:
+\begin{lstlisting}
+for n in range(1, 100):
+    if n % 7 == 0 and n % 5 == 0:
+        print("Primeiro múltiplo de 35:", n)
+        break
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Laços encaixados: padrões}
+\begin{lstlisting}
+for linha in range(1, 5):
+    for coluna in range(linha):
+        print('*', end='')
+    print()
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+*
+**
+***
+****
+\end{lstlisting}
+  \begin{itemize}
+    \item O laço interno \emph{completo} executa a cada volta do externo
+    \item Exercício 3.15: gerar outros padrões com laços encaixados
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Condições complexas: desafios de lógica}
+  \begin{exampleblock}{Desafio 1}
+    Mostre todos os anos \textbf{bissextos} entre 1900 e 2030. (Revisite a condição da Aula 7.)
+  \end{exampleblock}
+  \begin{exampleblock}{Desafio 2}
+    Mostre os números de 1 a 100 que são divisíveis por 3 \textbf{ou} 5, mas \textbf{não} por ambos.
+  \end{exampleblock}
+  \begin{exampleblock}{Desafio 3}
+    Leia números até digitar 0 e informe o maior e o menor.
+  \end{exampleblock}
+  \vspace{1ex}
+  \small Estratégia: escreva primeiro a \emph{condição} em português, depois traduza para \texttt{and}/\texttt{or}/\texttt{not}, e teste os extremos.
+\end{frame}
+
+\begin{frame}[fragile]{Desafio 1: bissextos em um intervalo}
+\begin{lstlisting}
+for ano in range(1900, 2031):
+    if (ano % 4 == 0 and ano % 100 != 0) or ano % 400 == 0:
+        print(ano, end=' ')
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+1904 1908 1912 ... 1996 2000 2004 ... 2028
+\end{lstlisting}
+  \begin{itemize}
+    \item 1900 \alert{não} aparece (divisível por 100, não por 400); 2000 aparece
+    \item Dica: conte quantos anos foram impressos usando um contador
+  \end{itemize}
+\end{frame}
+
+\exercicios{3}{%
+  \begin{itemize}\small
+    \item \texttt{while}: \textbf{3.11, 3.12}
+    \item \texttt{for}: \textbf{3.13} (refazer 3.11), \textbf{3.14} (tabela Celsius \(\to\) Fahrenheit), \textbf{3.15} (padrões com laços encaixados)
+  \end{itemize}}
+
+\resumo{
+  \item \texttt{while} repete enquanto a condição for verdadeira: cuidado com laços infinitos
+  \item \texttt{for} com \texttt{range} é ideal para laços contados
+  \item Padrões: contador, acumulador, sentinela
+  \item Laços podem ser encaixados; \texttt{break} e \texttt{continue} controlam o fluxo
+  \item Próxima aula (prática): laboratório de problemas reais
+}
+
+\end{document}

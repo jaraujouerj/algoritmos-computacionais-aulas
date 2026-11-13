@@ -1,0 +1,223 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{03}{Arquitetura e Execução}{Modelo de von Neumann, software e o ambiente de trabalho em Python}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Sistema de computação: hardware e software (Cap.~1.8--1.10)
+    \item Modelo de von Neumann: CPU, memória, entrada e saída
+    \item Compilada ou interpretada? (1.11)
+    \item Sistema operacional (1.12)
+    \item \textbf{Prática:} o interpretador interativo e os scripts \texttt{.py} (Cap.~2.1)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{A dualidade fundamental}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{block}{Hardware}
+      Partes físicas: eletrônicas, elétricas e mecânicas. \emph{Tangível.}
+    \end{block}
+    \column{0.5\textwidth}
+    \begin{exampleblock}{Software}
+      Programas e dados: o lado lógico. \emph{Intangível.}
+    \end{exampleblock}
+  \end{columns}
+  \vspace{1ex}
+  Um sistema de computação é a fusão dos dois: sem software o hardware não faz nada útil, e sem hardware o software não executa.
+\end{frame}
+
+\begin{frame}{Componentes de um computador}
+  \begin{columns}[c]
+    \column{0.42\textwidth}
+    \includegraphics[height=0.6\textheight]{sistemadecomputacao.png}
+    \column{0.56\textwidth}
+    \footnotesize
+    \begin{enumerate}
+      \item Monitor
+      \item Placa-mãe
+      \item Processador (CPU)
+      \item Memória
+      \item Placas de expansão
+      \item Fonte de alimentação
+      \item Drive óptico
+      \item Disco rígido (armazenamento)
+      \item Mouse
+      \item Teclado
+    \end{enumerate}
+  \end{columns}
+  \vfill{\scriptsize Figura do livro (Cap.~1.8).}
+\end{frame}
+
+\begin{frame}{O modelo de von Neumann}
+  \begin{center}
+  \begin{tikzpicture}[node distance=1.8cm,
+      caixa/.style={draw=uerjazul,fill=uerjcinza,rounded corners,minimum width=2.6cm,minimum height=1.1cm,align=center},
+      seta/.style={-{Stealth},thick,uerjazul}]
+    \node[caixa] (cpu) {CPU\\\footnotesize unidade de controle + ULA};
+    \node[caixa,right=2.4cm of cpu] (mem) {Memória\\\footnotesize programa + dados};
+    \node[caixa,above=1.3cm of $(cpu)!0.5!(mem)$] (ent) {Entrada\\\footnotesize teclado, mouse};
+    \node[caixa,below=1.3cm of $(cpu)!0.5!(mem)$] (sai) {Saída\\\footnotesize tela, disco};
+    \draw[seta,<->] (cpu) -- (mem);
+    \draw[seta] (ent) -- (cpu);
+    \draw[seta] (ent) -- (mem);
+    \draw[seta] (cpu) -- (sai);
+    \draw[seta] (mem) -- (sai);
+  \end{tikzpicture}
+  \end{center}
+  \vspace{-1ex}
+  \small Ideia central (anos 1940): \alert{programa e dados ficam na mesma memória}. Antes disso, reprogramar um computador exigia trocar cabos.
+\end{frame}
+
+\begin{frame}{CPU, memória e ciclo de instrução}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{itemize}
+      \item \textbf{CPU:} executa instruções; tem unidade de controle, ULA e registradores
+      \item \textbf{Memória principal (RAM):} rápida, \emph{volátil}
+      \item \textbf{Armazenamento:} lento, permanente (SSD, HD)
+    \end{itemize}
+    \column{0.45\textwidth}
+    \begin{block}{Ciclo da CPU}
+      \begin{enumerate}\small
+        \item Buscar a instrução
+        \item Decodificar
+        \item Executar
+        \item Repetir (bilhões de vezes por segundo)
+      \end{enumerate}
+    \end{block}
+  \end{columns}
+  \vspace{1ex}
+  Frequência típica: 3 GHz = \(3\times10^9\) ciclos por segundo.
+\end{frame}
+
+\begin{frame}{Software: do código-fonte ao hardware}
+  \begin{itemize}
+    \item A CPU só entende \textbf{linguagem de máquina} (binário)
+    \item Humanos preferem \textbf{linguagens de alto nível}: Python, C, Java\ldots
+    \item É preciso \alert{traduzir}: duas estratégias clássicas
+  \end{itemize}
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+    \begin{block}{Compilação}
+      Traduz tudo antes; gera um executável (C, C++).
+    \end{block}
+    \column{0.48\textwidth}
+    \begin{block}{Interpretação}
+      Traduz e executa linha a linha (Python clássico).
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Linguagem compilada}
+  \centering
+  \includegraphics[height=0.55\textheight]{compilado.png}
+
+  {\scriptsize Figura do livro (Cap.~1.11). Vantagem: execução rápida. Desvantagem: ciclo editar--compilar--executar mais longo.}
+\end{frame}
+
+\begin{frame}{Linguagem interpretada}
+  \centering
+  \includegraphics[height=0.55\textheight]{interpretado.png}
+
+  {\scriptsize Figura do livro. Vantagem: feedback imediato. Desvantagem: mais lenta que o código compilado.}
+\end{frame}
+
+\begin{frame}{E o Python? Semi-interpretado}
+  \centering
+  \includegraphics[height=0.55\textheight]{semiinyterpretado.png}
+
+  {\scriptsize O fonte é traduzido para \emph{bytecode}, executado por uma \textbf{máquina virtual} (Python Virtual Machine).}
+\end{frame}
+
+\begin{frame}{Sistema operacional}
+  O sistema operacional (Linux, Windows, macOS, Android\ldots) é o software que \textbf{gerencia o hardware} e serve de intermediário para os programas:
+  \begin{itemize}
+    \item Gerencia processos e a memória
+    \item Controla arquivos e dispositivos de entrada e saída
+    \item Fornece a interface com o usuário
+    \item Isola um programa do outro (segurança)
+  \end{itemize}
+  \begin{exampleblock}{Consequência prática}
+    Quando seu programa abre um arquivo ou imprime algo, ele \emph{pede} isso ao sistema operacional.
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Ambiente de trabalho: duas formas de usar o Python}
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+    \begin{block}{Interpretador interativo}
+      Digite \texttt{python} no terminal; o prompt \texttt{>>>} aguarda um comando.\\
+      Ótimo para \emph{experimentar}.
+    \end{block}
+    \column{0.48\textwidth}
+    \begin{block}{Script \texttt{.py}}
+      Arquivo de texto com o programa; executa com \texttt{python programa.py}.\\
+      Ótimo para \emph{guardar e reutilizar}.
+    \end{block}
+  \end{columns}
+  \vspace{1ex}
+  \small Instalação do Python (Windows e Linux/Ubuntu): Apêndice do livro.
+\end{frame}
+
+\begin{frame}[fragile]{Prática 1: o interpretador interativo}
+\begin{lstlisting}
+>>> 2 + 3 * 4
+14
+>>> (2 + 3) * 4
+20
+>>> 7 / 2
+3.5
+>>> 7 // 2
+3
+>>> 7 % 2
+1
+>>> print("Olá, mundo!")
+Olá, mundo!
+>>> exit()
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Prática 2: o primeiro script}
+  Crie o arquivo \texttt{ola.py} no editor:
+\begin{lstlisting}
+nome = input("Qual é o seu nome? ")
+print("Olá,", nome, "!")
+\end{lstlisting}
+  Execute no terminal:
+\begin{lstlisting}[language={},style=saida]
+$ python ola.py
+Qual é o seu nome? Ada
+Olá, Ada !
+\end{lstlisting}
+  \begin{itemize}
+    \item Salve com \emph{codificação UTF-8} para os acentos funcionarem
+    \item Erros de sintaxe aparecem com o número da linha: leia a mensagem!
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Para fixar}
+  \begin{enumerate}
+    \item Desenhe o modelo de von Neumann e diga o que cada bloco guarda ou faz.
+    \item Python é compilado ou interpretado? Explique.
+    \item Qual a diferença entre digitar no editor \texttt{idle} e executar um \texttt{.py}?
+    \item Por que a RAM perde os dados ao desligar o computador e o SSD não?
+  \end{enumerate}
+  \vspace{1ex}
+  Exercícios do livro para esta aula (Cap.~1 e Cap.~2): ver a lista de revisão da Aula 14 e o site
+  \href{\siteurl exercicios/cap1/}{\texttt{\siteurl exercicios/cap1/}}.
+\end{frame}
+
+\resumo{
+  \item Sistema de computação = hardware + software
+  \item von Neumann: programa e dados na mesma memória; CPU executa o ciclo busca--decodifica--executa
+  \item Python é \emph{semi-interpretado}: bytecode + máquina virtual
+  \item Sistema operacional gerencia recursos e arquivos
+  \item Usaremos o interpretador interativo para testar e scripts \texttt{.py} para guardar
+  \item Próxima aula: pensamento algorítmico, fluxogramas e pseudocódigo
+}
+
+\end{document}

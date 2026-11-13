@@ -1,0 +1,326 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{C2 (Eng.\ de Computação)}{Ordenando Coisas}{Método da bolha, inserção, intercalação e mergesort}
+
+\begin{document}
+\capa
+
+\begin{frame}{Aula extra para Engenharia de Computação}
+  \begin{alertblock}{Onde se encaixa}
+    Capítulo \textbf{8} do livro; continua a aula C1 (Recursão). Não faz parte do curso genérico para as demais engenharias.
+  \end{alertblock}
+  \textbf{Roteiro}
+  \begin{itemize}
+    \item Por que ordenar? (Cap.~8)
+    \item Ordenando uma lista: método da bolha (8.1) e sentinela
+    \item Ordenação por inserção (8.2)
+    \item Intercalação de listas e \emph{mergesort} (Exercícios 8.5 e 8.6)
+    \item Comparando algoritmos; a ordenação do Python
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Por que ordenar?}
+  \begin{columns}[T]
+    \column{0.55\textwidth}
+    \begin{itemize}
+      \item Dados ordenados são \textbf{muito mais fáceis de usar}: lista telefônica, dicionário, classificação de notas
+      \item Buscar em dados ordenados é rápido: \alert{busca binária} (Aula 4): \(\log_2 n\) passos
+      \item Muitos algoritmos assumem entrada ordenada: intercalar, remover duplicatas, achar medianas
+    \end{itemize}
+    \column{0.42\textwidth}
+    \begin{exampleblock}{Problema}
+      Dada uma lista de \(n\) números (ou nomes, ou registros), reorganizá-la em ordem crescente.
+    \end{exampleblock}
+  \end{columns}
+  \vspace{1ex}
+  Veremos \textbf{três} algoritmos: dois simples (\(\approx n^2\) operações) e um eficiente (\(\approx n\log n\)).
+\end{frame}
+
+\begin{frame}{O método da bolha (\emph{bubble sort}): a ideia}
+  \begin{enumerate}
+    \item Compare cada par de elementos \textbf{consecutivos}
+    \item Se estão fora de ordem, \textbf{troque-os}
+    \item Ao fim de uma passada, o \alert{maior} elemento está na última posição (``a bolha sobe'')
+    \item Repita: o segundo maior ocupa a penúltima posição, etc.
+    \item Após \(n-1\) passadas, a lista está ordenada
+  \end{enumerate}
+  \vspace{1ex}
+  \begin{block}{Por que \(n-1\) passadas?}
+    Cada passada coloca \emph{pelo menos} um elemento na posição final. Com \(n-1\) elementos no lugar, o último também está.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Acompanhando a bolha: \([5,2,4,1,3]\)}
+  \centering\small
+  \begin{tabular}{lcccccl}
+    \toprule
+    & & & & & & Observação\\
+    \midrule
+    início & 5 & 2 & 4 & 1 & 3 &\\
+    1\textordfeminine\ passada & 2 & 4 & 1 & 3 & \textbf{5} & o maior foi para o fim\\
+    2\textordfeminine\ passada & 2 & 1 & 3 & \textbf{4} & \textbf{5} &\\
+    3\textordfeminine\ passada & 1 & 2 & \textbf{3} & \textbf{4} & \textbf{5} & já ordenada\\
+    4\textordfeminine\ passada & 1 & 2 & 3 & 4 & 5 & passada ``inútil''\\
+    \bottomrule
+  \end{tabular}
+  \vspace{1.5ex}
+
+  \normalsize Na 1\textordfeminine\ passada: \texttt{(5,2)} troca; \texttt{(5,4)} troca; \texttt{(5,1)} troca; \texttt{(5,3)} troca.\\
+  \small Reparou? A lista ficou ordenada na 3\textordfeminine\ passada, mas o algoritmo faria a 4\textordfeminine\ de qualquer jeito.
+\end{frame}
+
+\begin{frame}[fragile]{Bolha em Python}
+\begin{lstlisting}
+def bubblesort(lista):
+    """Ordena uma lista pelo método da bolha."""
+    n = len(lista)
+    for i in range(n - 1):               # n-1 passadas
+        for j in range(n - 1):           # compara pares consecutivos
+            if lista[j] > lista[j + 1]:
+                lista[j], lista[j + 1] = lista[j + 1], lista[j]   # troca
+        print(lista)                     # mostra cada passada
+
+l = [503, 87, 512, 61, 908, 170, 897, 275]
+bubblesort(l)
+\end{lstlisting}
+  \begin{itemize}
+    \item A \textbf{troca} \texttt{a, b = b, a} usa o desempacotamento de tuplas (Aula 20)
+    \item Ordena a lista \emph{no lugar} (alias! Aula 18) e devolve \texttt{None}
+  \end{itemize}
+  \fonte{code/Cap8/prog.8.02\_bubblesort.py}
+\end{frame}
+
+\begin{frame}[fragile]{Melhoria: a \emph{sentinela}}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+def bubblesort(lista):
+    """Ordena uma lista pelo método da bolha, com sentinela."""
+    n = len(lista)
+    fora_de_ordem = True
+    while fora_de_ordem:
+        fora_de_ordem = False            # sentinela: nenhuma troca ainda
+        for j in range(n - 1):
+            if lista[j] > lista[j + 1]:
+                lista[j], lista[j + 1] = lista[j + 1], lista[j]
+                fora_de_ordem = True     # houve troca: outra passada
+\end{lstlisting}
+  \begin{itemize}
+    \item Se uma passada \alert{não fez nenhuma troca}, a lista já está ordenada: pare
+    \item Para uma lista já ordenada, faz \emph{uma} passada: é o caso em que a bolha é imbatível
+    \item Exercício 8.2: aproveite que o maior elemento já está no lugar para \emph{encurtar} a passada
+  \end{itemize}
+  \fonte{code/Cap8/prog.8.03\_bubblesort\_com\_sentinela.py}
+\end{frame}
+
+\begin{frame}{Ordenação por inserção: a ideia do baralho}
+  Imagine ordenar cartas na mão:
+  \begin{enumerate}
+    \item Pegue as duas primeiras e ordene-as
+    \item Pegue a próxima carta e \textbf{insira-a no lugar certo} entre as já ordenadas (comparando a partir da última)
+    \item Repita até acabarem as cartas
+  \end{enumerate}
+  \vspace{1ex}
+  \centering\small
+  \begin{tabular}{lccccc}
+    \toprule
+    passo & \multicolumn{5}{c}{lista (parte ordenada em negrito)}\\
+    \midrule
+    início & 5 & 2 & 4 & 1 & 3\\
+    insere 2 & \textbf{2} & \textbf{5} & 4 & 1 & 3\\
+    insere 4 & \textbf{2} & \textbf{4} & \textbf{5} & 1 & 3\\
+    insere 1 & \textbf{1} & \textbf{2} & \textbf{4} & \textbf{5} & 3\\
+    insere 3 & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5}\\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\begin{frame}[fragile]{Inserção em Python}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+def insert_sort(lista):
+    """Ordena uma lista pelo método da inserção."""
+    for j in range(1, len(lista)):
+        elemento = lista[j]                  # a "carta" a inserir
+        i = j - 1
+        while i >= 0 and lista[i] > elemento:
+            lista[i + 1] = lista[i]          # desloca para a direita
+            i -= 1
+        lista[i + 1] = elemento              # coloca no lugar
+        print(lista)
+
+l = [503, 87, 512, 61, 908, 170, 897, 275]
+insert_sort(l)
+\end{lstlisting}
+  \begin{itemize}
+    \item Em vez de trocar, \emph{desloca} elementos e insere uma única vez
+    \item Ótima para listas \emph{quase ordenadas} e pequenas
+    \item Exercício 8.3: construa sua versão passo a passo; Exercício 8.4: versão recursiva (não ganha desempenho)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Ordenando nomes e registros (Exercício 8.1)}
+\begin{lstlisting}
+nomes = ['Maria', 'Ana', 'João', 'Beatriz']
+print('Ana' < 'Maria')            # True: strings comparam em ordem alfabética
+bubblesort(nomes)                 # mesmo código serve para strings!
+
+alunos = [('Ana', 8.5), ('João', 7.0), ('Beatriz', 9.2)]
+por_nota = sorted(alunos, key=lambda a: a[1], reverse=True)
+\end{lstlisting}
+  \begin{itemize}
+    \item O mesmo algoritmo funciona para qualquer tipo que possa ser comparado com \texttt{>}
+    \item Cuidado com maiúsculas/acentos: \texttt{'Zé' < 'ana'} é \texttt{True} (código ASCII/Unicode, Aula 2); use \texttt{key=str.lower}
+    \item Para registros, compare por um \textbf{campo} (nota, nome, data)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Intercalação: juntando duas listas ordenadas (Exercício 8.5)}
+\begin{lstlisting}
+def intercala(lista1, lista2):
+    """Intercala duas listas já ordenadas numa terceira, também ordenada."""
+    resultado = []
+    i = j = 0
+    while i < len(lista1) and j < len(lista2):
+        if lista1[i] <= lista2[j]:
+            resultado.append(lista1[i]); i += 1
+        else:
+            resultado.append(lista2[j]); j += 1
+    resultado.extend(lista1[i:])        # sobras (só uma das listas tem)
+    resultado.extend(lista2[j:])
+    return resultado
+
+print(intercala([1, 3, 5, 7, 9], [2, 4, 6, 8, 10]))
+\end{lstlisting}
+  \small Percorre cada lista \emph{uma única vez}: \(n_1+n_2\) passos. Como duas pilhas de cartas já ordenadas.
+\end{frame}
+
+\begin{frame}{Mergesort: dividir para conquistar}
+  \begin{columns}[T]
+    \column{0.52\textwidth}
+    \begin{enumerate}
+      \item Se a lista tem 0 ou 1 elemento, já está ordenada (\alert{caso base})
+      \item Divida-a em duas metades
+      \item Ordene cada metade \textbf{recursivamente}
+      \item \textbf{Intercale} as metades ordenadas
+    \end{enumerate}
+    \column{0.45\textwidth}
+    \begin{tikzpicture}[scale=1.0,transform shape,
+        c/.style={draw=uerjazul,fill=uerjcinza,font=\scriptsize,inner sep=2pt}]
+      \node[c] (a) at (0,3) {5 2 4 1 3 9};
+      \node[c] (b) at (-1.5,2) {5 2 4};
+      \node[c] (c) at (1.5,2) {1 3 9};
+      \node[c] (d) at (-2.3,1) {5};  \node[c] (e) at (-0.8,1) {2 4};
+      \node[c] (f) at (0.8,1) {1};   \node[c] (g) at (2.3,1) {3 9};
+      \node[c,fill=uerjouro!20] (h) at (-1.5,0) {2 4 5};
+      \node[c,fill=uerjouro!20] (i) at (1.5,0) {1 3 9};
+      \node[c,fill=uerjouro!35] (j) at (0,-1) {1 2 3 4 5 9};
+      \foreach \u/\v in {a/b,a/c,b/d,b/e,c/f,c/g}{\draw[-{Stealth},uerjazul] (\u)--(\v);}
+      \draw[-{Stealth},uerjouro] (d)--(h); \draw[-{Stealth},uerjouro] (e)--(h);
+      \draw[-{Stealth},uerjouro] (f)--(i); \draw[-{Stealth},uerjouro] (g)--(i);
+      \draw[-{Stealth},uerjouro] (h)--(j); \draw[-{Stealth},uerjouro] (i)--(j);
+    \end{tikzpicture}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Mergesort em Python (Exercício 8.6)}
+\begin{lstlisting}
+def mergesort(lista):
+    """Devolve uma NOVA lista ordenada (não altera a original)."""
+    if len(lista) <= 1:                  # caso base
+        return lista
+    meio = len(lista) // 2
+    esquerda = mergesort(lista[:meio])   # ordena a 1a metade
+    direita = mergesort(lista[meio:])    # ordena a 2a metade
+    return intercala(esquerda, direita)  # junta
+
+print(mergesort([5, 2, 4, 1, 3, 9, 0]))  # [0, 1, 2, 3, 4, 5, 9]
+\end{lstlisting}
+  \begin{itemize}
+    \item Combina \textbf{recursão} (aula C1) e \textbf{intercalação}
+    \item Cada nível da recursão processa \(n\) elementos e há \(\log_2 n\) níveis: \(\approx n\log_2 n\) operações
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Comparando os algoritmos}
+  \centering\small
+  \begin{tabular}{lccc}
+    \toprule
+    & \textbf{Bolha} & \textbf{Inserção} & \textbf{Mergesort}\\
+    \midrule
+    Comparações (pior caso) & \(\approx n^2\) & \(\approx n^2/2\) & \(\approx n\log_2 n\)\\
+    Melhor caso (já ordenada) & \(n\) (com sentinela) & \(n\) & \(n\log_2 n\)\\
+    Memória extra & nenhuma & nenhuma & \(\approx n\)\\
+    Simplicidade & alta & alta & média (recursão)\\
+    \bottomrule
+  \end{tabular}
+  \vspace{2ex}
+
+  \normalsize
+  \begin{tabular}{rrr}
+    \toprule
+    \(n\) & \(n^2\) & \(n\log_2 n\)\\
+    \midrule
+    1\,000 & 1\,000\,000 & \(\approx\) 10\,000\\
+    1\,000\,000 & \(10^{12}\) & \(\approx\) 20\,000\,000\\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\begin{frame}[fragile]{Medindo o tempo}
+\begin{lstlisting}
+import random, time
+
+for n in (500, 1000, 2000, 4000):
+    dados = [random.randint(0, 10**6) for _ in range(n)]
+    t0 = time.perf_counter(); bubblesort(dados[:]);        t1 = time.perf_counter()
+    mergesort(dados);                                      t2 = time.perf_counter()
+    sorted(dados);                                         t3 = time.perf_counter()
+    print(f"{n:5d}  bolha {t1-t0:.3f}s  merge {t2-t1:.4f}s  sorted {t3-t2:.5f}s")
+\end{lstlisting}
+  \begin{itemize}
+    \item Dobrar \(n\): a bolha leva \alert{4 vezes} mais; o mergesort pouco mais que 2 vezes
+    \item Remova os \texttt{print}s dos algoritmos antes de medir!
+    \item \texttt{sorted} e \texttt{list.sort} (Aula 18) usam o \emph{Timsort}: mistura de inserção e mergesort, em C
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Na prática: use \texttt{sorted} e \texttt{sort}}
+  \begin{itemize}
+    \item Em programas reais, use \textbf{\texttt{sorted(lista)}} ou \textbf{\texttt{lista.sort()}}: rápidos, testados e \emph{estáveis}
+    \item \texttt{key=} escolhe o critério; \texttt{reverse=True} inverte
+  \end{itemize}
+  \begin{exampleblock}{Então por que aprender os algoritmos?}
+    \begin{itemize}\small
+      \item Para entender \textbf{o que acontece por baixo} e seu custo
+      \item Para desenvolver o pensamento algorítmico (invariantes, casos-limite, eficiência)
+      \item Para reconhecer padrões: \emph{dividir e conquistar}, \emph{inserção incremental}
+      \item Em entrevistas e concursos
+    \end{itemize}
+  \end{exampleblock}
+  \small \emph{Curiosidade:} existem outros algoritmos clássicos: seleção, \emph{quicksort}, \emph{heapsort}, ordenação por contagem\ldots (disciplina de Estruturas de Dados).
+\end{frame}
+
+\begin{frame}{Atividades}
+  \begin{enumerate}
+    \item Faça o \textbf{teste de mesa} da bolha e da inserção para \([6,3,8,2,9,1]\).
+    \item Conte as \textbf{trocas} e as \textbf{comparações} feitas pela bolha: acrescente contadores ao código. Compare com e sem sentinela.
+    \item Escreva \texttt{selection\_sort}: ache o menor elemento e coloque-o na 1\textordfeminine\ posição; depois o 2\textordmasculine\ menor\ldots
+    \item Ordene uma lista de alunos (dicionários) por nota decrescente e, em caso de empate, por nome.
+    \item Implemente \textbf{busca binária} (Aula 4) em uma lista ordenada e compare com \texttt{in}.
+  \end{enumerate}
+\end{frame}
+
+\exercicios{8}{%
+  \begin{itemize}\small
+    \item Bolha: \textbf{8.1} (com nomes), \textbf{8.2} (com sentinela melhorada)
+    \item Inserção: \textbf{8.3} (desenvolva o algoritmo), \textbf{8.4} (versão recursiva)
+    \item Intercalação e mergesort: \textbf{8.5}, \textbf{8.6}
+  \end{itemize}}
+
+\resumo{
+  \item Ordenar facilita buscar e processar dados
+  \item Bolha e inserção: simples, \(\approx n^2\); sentinela evita passadas inúteis
+  \item Mergesort: dividir, ordenar recursivamente e intercalar: \(\approx n\log n\)
+  \item Em programas reais, use \texttt{sorted} e \texttt{list.sort}
+  \item Recursão e ordenação encerram o conteúdo extra de Engenharia de Computação
+}
+
+\end{document}

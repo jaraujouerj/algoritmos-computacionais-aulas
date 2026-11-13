@@ -1,0 +1,266 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{27}{Visualização de Dados com Matplotlib}{Gráficos de linha, dispersão, histograma e caixa}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Por que visualizar dados? O quarteto de Anscombe
+    \item O básico: \texttt{pyplot}, \texttt{plot}, \texttt{show}
+    \item Figuras e eixos (\texttt{Figure} e \texttt{Axes}); \emph{subplots}
+    \item Gráficos estatísticos: histograma, dispersão, \emph{boxplot}, barras
+    \item Rótulos, legendas e como salvar a figura
+  \end{itemize}
+  \vspace{1ex}
+  {\footnotesize Material: notebook \texttt{notebooks/tutorial\_de\_matplotlib.ipynb}. Todas as figuras desta aula são geradas por \texttt{slides/figuras/gera\_figuras.py}.}
+\end{frame}
+
+\begin{frame}{Por que visualizar? O quarteto de Anscombe}
+  \begin{columns}[c]
+    \column{0.5\textwidth}
+    \includegraphics[width=\textwidth]{fig_anscombe.png}
+    \column{0.47\textwidth}
+    \begin{itemize}\small
+      \item Quatro conjuntos de dados com \textbf{estatísticas praticamente idênticas}: mesma média de \(x\) e \(y\), mesma variância, mesma correlação (\(\approx0{,}816\)) e a mesma reta de regressão
+      \item Mas os dados são \alert{completamente diferentes}!
+      \item Moral: só números resumidos não bastam; \textbf{olhe os dados}
+    \end{itemize}
+  \end{columns}
+  \vspace{1ex}
+  {\scriptsize No notebook: \texttt{sns.load\_dataset("anscombe")}.}
+\end{frame}
+
+\begin{frame}[fragile]{Primeiro gráfico}
+\begin{lstlisting}
+import numpy as np
+import matplotlib.pyplot as plt
+
+x = np.linspace(0, 2 * np.pi, 200)
+plt.plot(x, np.sin(x))
+plt.show()            # necessário para exibir
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{matplotlib.pyplot} (apelido \texttt{plt}) concentra as funções de desenho
+    \item \texttt{plt.plot(x, y)} desenha \textbf{linhas}; \texttt{plt.plot(x, y, 'o')} desenha \textbf{pontos}
+    \item Em scripts, \texttt{plt.show()} abre a janela; em Jupyter o gráfico aparece sozinho
+    \item Instalação: \texttt{pip install matplotlib}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Figura e eixos: a forma recomendada}
+  \begin{columns}[T]
+    \column{0.55\textwidth}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+fig, ax = plt.subplots()
+ax.plot(x, np.sin(x), label="sen(x)")
+ax.plot(x, np.cos(x), "--", label="cos(x)")
+ax.set_title("Seno e cosseno")
+ax.set_xlabel("x (rad)")
+ax.set_ylabel("y")
+ax.legend()
+fig.savefig("fig_linha.png", dpi=150)
+\end{lstlisting}
+    \column{0.42\textwidth}
+    \includegraphics[width=\textwidth]{fig_linha.png}
+  \end{columns}
+  \begin{itemize}\small
+    \item \textbf{Figure}: a tela inteira; \textbf{Axes}: um gráfico dentro dela
+    \item Título, rótulos com unidades e legenda: \alert{sempre}
+    \item \texttt{savefig} grava PNG, PDF ou SVG
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Dispersão e ajuste: o ensaio do resistor}
+  \begin{columns}[T]
+    \column{0.52\textwidth}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+V = np.array([5.0, 10.0, 15.0, 20.0])
+I = np.array([0.25, 0.52, 0.76, 1.01])
+a, b = np.polyfit(V, I, 1)
+
+fig, ax = plt.subplots()
+ax.scatter(V, I, label="medidas")
+xx = np.linspace(0, 22, 50)
+ax.plot(xx, a * xx + b,
+        label=f"I = {a:.4f} V + {b:.4f}")
+ax.set_xlabel("Tensão (V)")
+ax.set_ylabel("Corrente (A)")
+ax.legend()
+plt.show()
+\end{lstlisting}
+    \column{0.45\textwidth}
+    \includegraphics[width=\textwidth]{fig_dispersao.png}
+  \end{columns}
+  \small Dados da Aula 19, ajuste da Aula 21; agora \emph{visualizados}.
+\end{frame}
+
+\begin{frame}[fragile]{Vários gráficos: \emph{subplots}}
+\begin{lstlisting}
+fig, axs = plt.subplots(2, 2, figsize=(6, 4), sharex=True, sharey=True)
+for ax, (xi, yi) in zip(axs.ravel(), conjuntos):
+    ax.scatter(xi, yi)
+fig.suptitle("Quarteto de Anscombe")
+fig.tight_layout()
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{plt.subplots(linhas, colunas)} devolve a figura e uma \emph{matriz} de eixos
+    \item \texttt{sharex}/\texttt{sharey} compartilham as escalas: facilita comparar
+    \item \texttt{figsize=(largura, altura)} em polegadas; \texttt{tight\_layout()} evita sobreposição
+    \item No notebook usa-se \texttt{fig.add\_subplot(2, 2, k)}: mesmo resultado
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Histograma: a distribuição de uma variável}
+  \begin{columns}[T]
+    \column{0.52\textwidth}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+import pandas as pd
+df = pd.read_csv("dadosproducao.csv")
+
+fig, ax = plt.subplots()
+ax.hist(df["tempo_ciclo_seg"], bins=10)
+ax.set_title("Distribuição do tempo de ciclo")
+ax.set_xlabel("Tempo de ciclo (s)")
+ax.set_ylabel("Número de peças")
+plt.show()
+\end{lstlisting}
+    \column{0.45\textwidth}
+    \includegraphics[width=\textwidth]{fig_hist.png}
+  \end{columns}
+  \begin{itemize}\small
+    \item Os valores são agrupados em faixas (\emph{bins}); a altura é a contagem
+    \item Dois ``montes'' sugerem \alert{dois grupos}: investigue (veja o \emph{boxplot})
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Boxplot: comparando grupos}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+maqs = sorted(df["maquina"].unique())
+dados = [df.loc[df.maquina == m,
+                "tempo_ciclo_seg"]
+         for m in maqs]
+fig, ax = plt.subplots()
+ax.boxplot(dados, tick_labels=maqs)
+ax.set_xlabel("Máquina")
+ax.set_ylabel("Tempo de ciclo (s)")
+plt.show()
+\end{lstlisting}
+    \column{0.47\textwidth}
+    \includegraphics[width=\textwidth]{fig_boxplot.png}
+  \end{columns}
+  \begin{itemize}\small
+    \item Caixa = quartis (25\%--75\%); linha = mediana; pontos = \emph{outliers}
+    \item A máquina M3 é claramente mais lenta: explica o segundo ``monte'' do histograma
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Barras: contagens por categoria}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+tab = (df.groupby("maquina")["status"]
+         .value_counts()
+         .unstack(fill_value=0))
+tab.plot(kind="bar", stacked=True)
+plt.ylabel("Peças")
+plt.show()
+\end{lstlisting}
+    \column{0.47\textwidth}
+    \includegraphics[width=\textwidth]{fig_barras.png}
+  \end{columns}
+  \begin{itemize}\small
+    \item Barras para \textbf{categorias}; histograma para \textbf{variáveis contínuas}
+    \item O Pandas desenha direto com \texttt{.plot()} (usa o Matplotlib por baixo): Aulas 28 e 29
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Dados multivariados: cor, tamanho e transparência}
+\begin{lstlisting}
+cores = {"Female": "#f1a340", "Male": "#998ec3"}
+fig, ax = plt.subplots()
+ax.scatter(data=tips, x="total_bill", y="tip",
+           c=tips["sex"].map(cores),       # cor = variável categórica
+           s=tips["size"] * 10,            # tamanho = outra variável
+           alpha=0.5)                      # transparência
+ax.set_xlabel("Conta total")
+ax.set_ylabel("Gorjeta")
+\end{lstlisting}
+  \begin{itemize}
+    \item Exemplo do notebook (conjunto \texttt{tips}, gorjetas em restaurante)
+    \item Use cor para \emph{categorias}, tamanho com \alert{moderação}, \texttt{alpha} para evitar sobreposição
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Boas práticas de gráficos}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{block}{Faça}
+      \begin{itemize}\small
+        \item Título, rótulos \textbf{com unidades}, legenda
+        \item Escolha o gráfico certo para o tipo de dado
+        \item Cores com bom contraste (e que funcionem em preto e branco)
+        \item Salve em alta resolução (\texttt{dpi=150} ou mais) ou em PDF/SVG
+      \end{itemize}
+    \end{block}
+    \column{0.5\textwidth}
+    \begin{alertblock}{Evite}
+      \begin{itemize}\small
+        \item Eixos truncados que exageram diferenças
+        \item Gráficos de pizza com muitas fatias
+        \item Efeitos 3D desnecessários
+        \item Poluição visual (grades pesadas, muitas cores)
+      \end{itemize}
+    \end{alertblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Qual gráfico usar?}
+  \centering\small
+  \begin{tabular}{lll}
+    \toprule
+    Quero mostrar\ldots & Gráfico & Função\\
+    \midrule
+    evolução ao longo do tempo / função & linha & \texttt{ax.plot}\\
+    relação entre duas variáveis & dispersão & \texttt{ax.scatter}\\
+    distribuição de uma variável & histograma & \texttt{ax.hist}\\
+    comparar distribuições entre grupos & \emph{boxplot} & \texttt{ax.boxplot}\\
+    comparar valores entre categorias & barras & \texttt{ax.bar}\\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\begin{frame}{Atividade no laboratório}
+  \begin{enumerate}
+    \item Plote \(f(x)=e^{-x/5}\cos(2x)\) para \(x\in[0,20]\), com título, rótulos e grade.
+    \item Com os dados do ensaio (Aula 19), faça a dispersão e a reta de ajuste; informe a resistência estimada no título.
+    \item Com \texttt{code/Projeto1/dadosproducao.csv}, faça o histograma do tempo de ciclo e o \emph{boxplot} por turno.
+    \item Faça uma figura com 2 gráficos lado a lado (\texttt{plt.subplots(1, 2)}): seno e cosseno em eixos separados.
+    \item Salve a figura em PDF e insira-a em um documento.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Para praticar e consultar}
+  \begin{itemize}
+    \item Notebook da aula: \texttt{notebooks/tutorial\_de\_matplotlib.ipynb}
+    \item Galeria de exemplos: \texttt{matplotlib.org/stable/gallery/}
+    \item Guia rápido: \emph{cheat sheets} do Matplotlib
+    \item Exercícios adicionais do livro: \href{\siteurl extras/}{\texttt{\siteurl extras/}}
+  \end{itemize}
+  \begin{exampleblock}{Conexão com o projeto}
+    Todo projeto final deve apresentar \alert{pelo menos dois gráficos} que ajudem a responder a pergunta do problema.
+  \end{exampleblock}
+\end{frame}
+
+\resumo{
+  \item Visualizar é parte da análise: estatísticas iguais podem esconder dados diferentes
+  \item Use \texttt{fig, ax = plt.subplots()} e configure título, rótulos e legenda
+  \item Escolha o gráfico pelo tipo de dado: linha, dispersão, histograma, \emph{boxplot}, barras
+  \item Salve com \texttt{fig.savefig}
+  \item Próxima aula: Pandas para carregar e manipular tabelas de dados
+}
+
+\end{document}

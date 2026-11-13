@@ -1,0 +1,343 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{C1 (Eng.\ de Computação)}{Recursão}{Funções que chamam a si mesmas}
+
+\begin{document}
+\capa
+
+\begin{frame}{Aula extra para Engenharia de Computação}
+  \begin{alertblock}{Onde se encaixa}
+    Esta aula e a seguinte (C2: Ordenação) correspondem aos capítulos \textbf{7} e \textbf{8} do livro e \textbf{não} fazem parte do curso genérico para as demais engenharias. Sugestão: após a Aula 23 (Arquivos) ou como Bloco~3B, antes da Prova 2.
+  \end{alertblock}
+  \textbf{Roteiro}
+  \begin{itemize}
+    \item A fila de programadores míopes (Cap.~7.1)
+    \item Cálculo recursivo do tamanho de uma lista (7.2)
+    \item Modelo de execução: a pilha (7.3)
+    \item Coelhos de Fibonacci (7.4)
+    \item Eficiência da recursão e \emph{memoização} (7.5)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{A fila de programadores míopes}
+  Você está numa fila enorme e quer saber sua \textbf{posição}, mas não enxerga ninguém.
+  \begin{columns}[T]
+    \column{0.55\textwidth}
+    \begin{enumerate}
+      \item Você pergunta à pessoa da frente: ``qual a sua posição?''
+      \item Ela pergunta à da frente, e assim por diante\ldots
+      \item O \alert{primeiro} da fila responde: ``sou o número 1''
+      \item Cada um volta somando 1 à resposta recebida
+      \item Você recebe a resposta e soma 1
+    \end{enumerate}
+    \column{0.42\textwidth}
+    \begin{block}{A estrutura da solução}
+      Se você souber a resposta, responda. Senão, faça \emph{a mesma pergunta} à pessoa da frente, some 1 e responda.
+    \end{block}
+  \end{columns}
+  \vspace{1ex}
+  Poucas pessoas sabiam sua posição, mas o \textbf{problema se reduziu} a uma versão menor do mesmo problema.
+\end{frame}
+
+\begin{frame}{Anatomia de uma função recursiva}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{block}{1. Caso base}
+      A situação \emph{trivial}, que se resolve sem nova chamada (o primeiro da fila).
+    \end{block}
+    \column{0.5\textwidth}
+    \begin{block}{2. Passo recursivo}
+      Reduz o problema a uma versão \emph{menor} do mesmo e usa a resposta dela.
+    \end{block}
+  \end{columns}
+  \vspace{1ex}
+  \begin{alertblock}{Sem caso base (ou sem avançar para ele)\ldots}
+    a função chama a si mesma indefinidamente até estourar a pilha: \texttt{RecursionError: maximum recursion depth exceeded}.
+  \end{alertblock}
+  \small Receita: (1) qual é o caso mais simples? (2) como reduzir o problema? (3) confie que a chamada recursiva já resolve o problema menor.
+\end{frame}
+
+\begin{frame}[fragile]{Tamanho de uma lista, recursivamente}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+def tam(f):
+    """Calcula tamanho da lista f."""
+    if f == []:
+        return 0              # caso base: lista vazia
+    else:
+        return 1 + tam(f[1:]) # 1 + tamanho do resto
+
+def main():
+    fila = [1, 43, 2, 3]
+    tamanho = tam(fila)
+    print('O tamanho da fila é', tamanho)
+
+main()
+\end{lstlisting}
+  \begin{itemize}
+    \item \(\text{tam}([1,43,2,3]) = 1 + \text{tam}([43,2,3]) = 1+1+\text{tam}([2,3]) = \cdots = 4\)
+    \item \texttt{f[1:]} (fatia, Aula 17) é a ``fila sem o primeiro''
+  \end{itemize}
+  \fonte{code/Cap7/prog.7.01\_len\_recursivo.py}
+\end{frame}
+
+\begin{frame}{Modelo de execução: a pilha de chamadas}
+  \begin{columns}[c]
+    \column{0.5\textwidth}
+    \begin{center}
+    \begin{tikzpicture}[scale=0.9,transform shape,
+        q/.style={draw=uerjazul,fill=uerjcinza,minimum width=4.4cm,minimum height=0.6cm,font=\footnotesize}]
+      \node[q,fill=uerjouro!25] at (0,0) {\texttt{tam([])} \(\to\) 0};
+      \node[q] at (0,0.65) {\texttt{tam([3])} \(\to\) espera};
+      \node[q] at (0,1.3) {\texttt{tam([2,3])} \(\to\) espera};
+      \node[q] at (0,1.95) {\texttt{tam([43,2,3])} \(\to\) espera};
+      \node[q] at (0,2.6) {\texttt{tam([1,43,2,3])} \(\to\) espera};
+      \node[font=\scriptsize,anchor=west] at (2.4,0) {topo};
+    \end{tikzpicture}
+    \end{center}
+    \column{0.47\textwidth}
+    \begin{itemize}\small
+      \item A \textbf{pilha} guarda, para cada chamada: os \emph{parâmetros} e o \emph{endereço de retorno}
+      \item Como uma pilha de pratos: só se retira o do \textbf{topo}
+      \item Ao atingir o caso base, as chamadas \emph{retornam} uma a uma: \(0\to1\to2\to3\to4\)
+      \item Cada chamada tem suas \textbf{próprias variáveis locais}
+    \end{itemize}
+  \end{columns}
+  \vspace{1ex}
+  {\footnotesize Python limita a profundidade (cerca de 1000 chamadas): \texttt{sys.getrecursionlimit()}.}
+\end{frame}
+
+\begin{frame}[fragile]{Acompanhando a recursão com \texttt{print}}
+\begin{lstlisting}
+def tam(f, nivel=0):
+    print('  ' * nivel + 'tam(', f, ')')
+    if f == []:
+        resultado = 0
+    else:
+        resultado = 1 + tam(f[1:], nivel + 1)
+    print('  ' * nivel + 'devolve', resultado)
+    return resultado
+
+tam([7, 8, 9])
+\end{lstlisting}
+  \small A indentação mostra a profundidade da pilha: o ``vai'' (chamadas) e o ``volta'' (retornos). Faça o mesmo \emph{teste de mesa} no papel antes de rodar.
+\end{frame}
+
+\begin{frame}[fragile]{Fatorial recursivo (Exercício 7.4)}
+  \[ n! = \begin{cases} 1 & \text{se } n = 0\\ n\cdot(n-1)! & \text{se } n > 0 \end{cases} \]
+\begin{lstlisting}
+def fatorial(n):
+    if n == 0:             # caso base
+        return 1
+    return n * fatorial(n - 1)
+
+print(fatorial(5))         # 120
+\end{lstlisting}
+  \begin{itemize}
+    \item A definição matemática \emph{já é} recursiva: a tradução para código é direta
+    \item Compare com a versão iterativa da Aula 8: mesmo resultado; a iterativa não usa a pilha
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Mais exemplos: soma e string invertida (Exercícios 7.1 e 7.6)}
+\begin{lstlisting}
+def soma(n):
+    """Soma dos n primeiros números: 1 + 2 + ... + n."""
+    if n == 0:
+        return 0
+    return n + soma(n - 1)
+
+def inverte(s):
+    """Devolve a string s invertida."""
+    if s == '':
+        return ''
+    return inverte(s[1:]) + s[0]
+
+print(soma(10))        # 55
+print(inverte('abc'))  # cba
+\end{lstlisting}
+  \small Pense: qual o caso base? Como o problema \emph{diminui} a cada chamada?
+\end{frame}
+
+\begin{frame}[fragile]{Palíndromo recursivo (Exercícios 7.2 e 7.3)}
+\begin{lstlisting}
+def palindromo(s):
+    """Diz se a palavra s é palíndromo."""
+    if len(s) < 2:                 # 0 ou 1 letra: é palíndromo
+        return True
+    if s[0] != s[-1]:              # extremos diferentes: não é
+        return False
+    return palindromo(s[1:-1])     # compara o "miolo"
+
+print(palindromo('arara'))   # True
+print(palindromo('ab'))      # False
+\end{lstlisting}
+  \begin{itemize}
+    \item Dois casos base; o problema encolhe \alert{de dois em dois} caracteres
+    \item Exercício 7.3: para frases, ignore espaços e maiúsculas \emph{sem} usar laços
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Coelhos de Fibonacci}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    Um casal de coelhos jovens leva 1 mês para amadurecer e depois gera 1 casal por mês. Quantos casais após \(n\) meses?
+    \[ F_n = F_{n-1} + F_{n-2},\quad F_0=0,\ F_1=1 \]
+    \centering\small
+    \begin{tabular}{c|cccccccccc}
+      \(n\) & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9\\\hline
+      \(F_n\) & 0 & 1 & 1 & 2 & 3 & 5 & 8 & 13 & 21 & 34\\
+    \end{tabular}
+    \column{0.47\textwidth}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+def fib(n):
+    """n-ésimo termo de Fibonacci."""
+    if n == 0 or n == 1:     # casos base
+        return n
+    else:
+        return fib(n - 1) + fib(n - 2)
+
+for i in range(10):
+    print(fib(i), end=' ')
+\end{lstlisting}
+    \begin{itemize}\small
+      \item \alert{Duas} chamadas recursivas por vez
+      \item Aparece na natureza, na arquitetura e em análise de algoritmos
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Árvore de chamadas de \texttt{fib(5)}}
+  \centering
+  \begin{tikzpicture}[scale=0.8,transform shape,
+      n/.style={draw=uerjazul,fill=uerjcinza,circle,inner sep=1.5pt,font=\footnotesize},
+      r/.style={draw=red!60!black,fill=red!8,circle,inner sep=1.5pt,font=\footnotesize},
+      level 1/.style={sibling distance=6cm},level 2/.style={sibling distance=3cm},level 3/.style={sibling distance=1.5cm},
+      level distance=1.1cm]
+    \node[n] {5}
+      child {node[n] {4}
+        child {node[n] {3}
+          child {node[n] {2} child {node[r] {1}} child {node[r] {0}}}
+          child {node[r] {1}}}
+        child {node[n] {2} child {node[r] {1}} child {node[r] {0}}}}
+      child {node[n] {3}
+        child {node[n] {2} child {node[r] {1}} child {node[r] {0}}}
+        child {node[r] {1}}};
+  \end{tikzpicture}
+
+  \small \texttt{fib(3)} é calculado \alert{2 vezes}, \texttt{fib(2)} 3 vezes\ldots O \emph{mesmo} subproblema é refeito muitas vezes.
+\end{frame}
+
+\begin{frame}[fragile]{Eficiência: o custo da recursão}
+  \begin{columns}[T]
+    \column{0.52\textwidth}
+    \begin{itemize}
+      \item Número de chamadas de \texttt{fib(n)}:\\
+            \(\text{chamadas}(n) = 2F_{n+1}-1\)
+      \item Cresce \alert{exponencialmente}
+    \end{itemize}
+    \centering\small
+    \begin{tabular}{rr}
+      \toprule
+      \(n\) & Chamadas\\
+      \midrule
+      10 & 177\\
+      20 & 21\,891\\
+      25 & 242\,785\\
+      35 & 29\,860\,703\\
+      50 & \(\approx 4\times10^{10}\)\\
+      \bottomrule
+    \end{tabular}
+    \column{0.45\textwidth}
+    \begin{block}{Custo = tempo + memória}
+      Recursão consome memória de pilha e pode repetir cálculos. Para \(n\) grande, é \emph{impraticável} sem melhorias.
+    \end{block}
+    \begin{alertblock}{Experimente}
+      Rode o Programa 7.5 do livro com \texttt{range(100)} e veja a partir de que termo ele ``trava''.
+    \end{alertblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Memoização: guardar o que já foi calculado}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+fibonacci = {0: 0, 1: 1}      # tabela de valores já calculados
+
+def fib(n):
+    """Calcula o n-ésimo termo da série de Fibonacci."""
+    if n not in fibonacci:
+        fibonacci[n] = fib(n - 2) + fib(n - 1)
+    return fibonacci[n]
+
+for i in range(100):
+    print('fib' + str(i) + '):' + str(fib(i)))
+\end{lstlisting}
+  \begin{itemize}
+    \item Cada termo é calculado \alert{uma única vez}: de exponencial para \textbf{linear}
+    \item Continua recursivo, agora com a ajuda de um \textbf{dicionário} (Aula 20)
+    \item Exercício 7.5: reescreva usando uma \emph{lista} no lugar do dicionário (justifique a escolha!)
+  \end{itemize}
+  \fonte{code/Cap7/prog.7.06\_calcula\_fibonacci4.py}
+\end{frame}
+
+\begin{frame}[fragile]{Versão iterativa e \texttt{functools.cache}}
+\begin{lstlisting}
+def fib_iterativo(n):
+    a, b = 0, 1
+    for _ in range(n):
+        a, b = b, a + b
+    return a
+
+from functools import cache
+
+@cache                         # memoização automática
+def fib(n):
+    return n if n < 2 else fib(n - 1) + fib(n - 2)
+
+print(fib(90), fib_iterativo(90))
+\end{lstlisting}
+  \begin{itemize}
+    \item A versão iterativa usa memória constante e não sofre limite de pilha
+    \item \texttt{@cache} (decorador) faz a memoização por você
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Recursão ou iteração?}
+  \centering\small
+  \begin{tabular}{p{5.3cm}p{5.3cm}}
+    \toprule
+    \textbf{Recursão é natural quando\ldots} & \textbf{Prefira iteração quando\ldots}\\
+    \midrule
+    a definição do problema é recursiva (fatorial, Fibonacci, árvores, diretórios) & o laço é simples (somar, contar, percorrer)\\
+    o problema se divide em subproblemas \emph{iguais} (divisão e conquista: \emph{mergesort}) & a profundidade pode ser grande (limite de pilha)\\
+    é preciso \emph{voltar atrás} (\emph{backtracking}, labirintos) & o desempenho é crítico\\
+    \bottomrule
+  \end{tabular}
+  \vspace{1.5ex}
+
+  \normalsize Toda recursão pode virar iteração (e vice-versa): a escolha é de \textbf{clareza} e \textbf{eficiência}.
+\end{frame}
+
+\begin{frame}{Atividades}
+  \begin{enumerate}
+    \item Escreva \texttt{potencia(base, n)} recursiva (\(base^n = base\cdot base^{n-1}\)). Depois uma versão rápida: \(base^n=(base^{n/2})^2\) para \(n\) par.
+    \item Escreva \texttt{soma\_digitos(n)}: \texttt{soma\_digitos(1234)} \(=10\).
+    \item Escreva \texttt{conta(lista, x)}: quantas vezes \(x\) aparece na lista (recursivamente).
+    \item Escreva \texttt{binario(n)} que devolve a string binária de \(n\) (\(n//2\) e \(n\%2\)). Conecte com a Aula 2!
+    \item \emph{Torre de Hanói}: escreva \texttt{hanoi(n, origem, destino, aux)} que imprime os movimentos.
+  \end{enumerate}
+\end{frame}
+
+\exercicios{7}{%
+  \begin{itemize}\small
+    \item \textbf{7.1} (string na ordem inversa), \textbf{7.2} (palíndromo recursivo), \textbf{7.3} (palíndromo em frases)
+    \item \textbf{7.4} (fatorial recursivo), \textbf{7.5} (Fibonacci com lista), \textbf{7.6} (soma recursiva)
+  \end{itemize}}
+
+\resumo{
+  \item Recursão: uma função que chama a si mesma para resolver versões menores do problema
+  \item Todo algoritmo recursivo precisa de um \textbf{caso base} e de um passo que \textbf{se aproxima} dele
+  \item As chamadas empilham-se na \textbf{pilha}; cada uma tem suas variáveis
+  \item Chamadas repetidas custam caro: use \textbf{memoização} (dicionário) ou iteração
+  \item Próxima aula: ordenação de listas e o poder de \emph{dividir e conquistar}
+}
+
+\end{document}

@@ -1,0 +1,157 @@
+% ============================================================
+%  ac1.sty -- estilo Beamer de "Algoritmos Computacionais I" (UERJ)
+%  Derivado de ../template_aula.tex. Uso em cada aula:
+%
+%    \documentclass[aspectratio=169,10pt,t]{beamer}
+%    \usepackage{ac1}
+%    \aulainfo{05}{Bases da Programação}{Identificadores, dados e tipos}
+%    \begin{document}
+%    \capa
+%    ...
+%    \end{document}
+% ============================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ac1}[2026/11/11 Estilo das aulas de Algoritmos Computacionais I]
+
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[T1]{fontenc}
+\RequirePackage[brazil]{babel}
+\RequirePackage{graphicx}
+\RequirePackage{xcolor}
+\RequirePackage{listings}
+\RequirePackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc}
+\RequirePackage{booktabs}
+\RequirePackage{array}
+
+% ---------- Dados fixos ----------
+\newcommand{\autor}{João Araujo}
+\newcommand{\disciplina}{Algoritmos Computacionais I}
+\newcommand{\instituicao}{Departamento de Engenharia de Sistemas e Computação}
+\newcommand{\logouerj}{../imagens/logo_uerj_cor_transparencia.png}
+\newcommand{\siteurl}{https://www.araujo.eng.uerj.br/livro/}
+\graphicspath{{../imagens/}{figuras/}}
+% O logo é opcional: se o arquivo não existir (ele não faz parte do repositório
+% público), o logo é simplesmente omitido. Veja o README.
+\newcommand{\logoinst}[1]{\IfFileExists{\logouerj}{\includegraphics[#1]{\logouerj}}{}}
+% Logo da capa: a quebra de linha só existe se o logo existir.
+\newcommand{\logocapa}[1]{\IfFileExists{\logouerj}{\includegraphics[height=#1]{\logouerj}\\[1.2ex]}{}}
+
+% \aulainfo{numero}{titulo}{subtitulo}
+\newcommand{\aulainfo}[3]{%
+  \title{#2}\subtitle{#3}\date{Aula #1}%
+  \author{\autor}\institute{\instituicao}}
+
+% ---------- Cores ----------
+\definecolor{uerjazul}{RGB}{0,62,126}
+\definecolor{uerjcinza}{RGB}{240,242,246}
+\definecolor{uerjouro}{RGB}{176,124,0}
+
+% ---------- Tema ----------
+\usetheme{default}
+\usecolortheme{default}
+\usefonttheme{professionalfonts}
+\setbeamertemplate{navigation symbols}{}
+\setbeamercolor{structure}{fg=uerjazul}
+\setbeamercolor{frametitle}{fg=uerjazul,bg=white}
+\setbeamercolor{title}{fg=uerjazul}
+\setbeamercolor{block title}{fg=white,bg=uerjazul}
+\setbeamercolor{block body}{bg=uerjcinza}
+\setbeamercolor{block title example}{fg=white,bg=uerjouro!85!black}
+\setbeamercolor{block body example}{bg=uerjouro!8}
+\setbeamercolor{block title alerted}{fg=white,bg=red!65!black}
+\setbeamercolor{block body alerted}{bg=red!6}
+\setbeamercolor{footline}{fg=white,bg=uerjazul}
+\setbeamercolor{itemize item}{fg=uerjazul}
+\setbeamercolor{enumerate item}{fg=uerjazul}
+\setbeamerfont{frametitle}{series=\bfseries,size=\large}
+\setbeamerfont{footline}{size=\scriptsize}
+\setbeamerfont{block title}{size=\small}
+
+\newlength{\alturalogo}\setlength{\alturalogo}{1.27cm}
+\setbeamertemplate{frametitle}{%
+  \nointerlineskip
+  \hbox to \textwidth{%
+    \parbox[b][\alturalogo][c]{\dimexpr\textwidth-\alturalogo-1em\relax}{%
+      \usebeamercolor[fg]{frametitle}\usebeamerfont{frametitle}\bfseries\insertframetitle}%
+    \hfill\parbox[b][\alturalogo][t]{0.62\alturalogo}{\vspace{0.21cm}\logoinst{height=0.85cm}}}%
+  \par\nointerlineskip
+  {\color{uerjazul}\rule{\textwidth}{1.2pt}}\par\vspace{0.8ex}%
+}
+
+\setbeamertemplate{footline}{%
+  \leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=.4\paperwidth,ht=2.5ex,dp=1.2ex,left,leftskip=1em]{footline}
+      \usebeamerfont{footline}\autor
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.4\paperwidth,ht=2.5ex,dp=1.2ex,center]{footline}
+      \usebeamerfont{footline}\disciplina
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.2\paperwidth,ht=2.5ex,dp=1.2ex,right,rightskip=1em]{footline}
+      \usebeamerfont{footline}\insertframenumber{} / \inserttotalframenumber
+    \end{beamercolorbox}%
+  }%
+}
+
+\setbeamertemplate{title page}{%
+  \vfill
+  \begin{center}
+    \logocapa{1.2cm}
+    {\scriptsize\color{uerjazul}\instituicao}\\[2.5ex]
+    {\usebeamerfont{title}\usebeamercolor[fg]{title}\Large\bfseries\inserttitle\par}
+    \vspace{0.6ex}{\normalsize\color{gray}\insertsubtitle\par}
+    \vspace{2ex}
+    {\color{uerjazul}\rule{0.5\textwidth}{0.6pt}}\\[1.5ex]
+    {\normalsize\autor}\\[0.6ex]
+    {\small\disciplina}\\[0.6ex]
+    {\footnotesize\insertdate}
+  \end{center}
+  \vfill
+}
+
+% Capa sem rodapé
+\newcommand{\capa}{%
+  {\setbeamertemplate{footline}{}\begin{frame}[plain]\titlepage\end{frame}}}
+
+% ---------- Código ----------
+\lstdefinestyle{ac1}{
+language=Python,
+basicstyle=\ttfamily\footnotesize,
+backgroundcolor=\color{uerjcinza},
+keywordstyle=\color{uerjazul}\bfseries,
+commentstyle=\color{gray}\itshape,
+stringstyle=\color{teal!70!black},
+frame=single, rulecolor=\color{uerjazul},
+showstringspaces=false, columns=fullflexible, keepspaces=true,
+inputencoding=utf8, extendedchars=true,
+literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+{ã}{{\~a}}1 {õ}{{\~o}}1 {ç}{{\c c}}1 {â}{{\^a}}1 {ê}{{\^e}}1 {ô}{{\^o}}1
+{Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+{Ã}{{\~A}}1 {Ç}{{\c C}}1 {à}{{\`a}}1 {º}{{\textordmasculine}}1
+}
+\lstdefinestyle{saida}{style=ac1, language={}, backgroundcolor=\color{white},
+  basicstyle=\ttfamily\footnotesize\color{black!80}, frame=leftline,
+  rulecolor=\color{uerjouro}}
+\lstset{style=ac1}
+
+% ---------- Atalhos ----------
+% Fonte do programa no livro / pasta code
+\newcommand{\fonte}[1]{{\scriptsize\color{gray}Fonte: \texttt{#1}}}
+
+% Frame de exercícios do site: \exercicios{cap}{lista de exercícios}
+\newcommand{\exercicios}[2]{%
+  \begin{frame}{Para praticar: exercícios do livro}
+    \begin{block}{Site do livro -- Capítulo #1}
+      #2
+    \end{block}
+    \vspace{1ex}
+    \small Enunciados e soluções comentadas em\\
+    \href{\siteurl exercicios/cap#1/}{\texttt{\siteurl exercicios/cap#1/}}\\[1ex]
+    \footnotesize Exercícios adicionais (sem solução):
+    \href{\siteurl extras/}{\texttt{\siteurl extras/}}
+  \end{frame}}
+
+% Frame de resumo: \resumo{\item ... \item ...}
+\newcommand{\resumo}[1]{%
+  \begin{frame}{Resumo da aula}\begin{itemize}#1\end{itemize}\end{frame}}

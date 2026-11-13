@@ -1,0 +1,227 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{18}{Operações Avançadas com Listas}{Métodos, clonagem de listas e listas como parâmetros}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Operações em listas: \texttt{in}, \texttt{del}, métodos (Cap.~5.7)
+    \item Clonando listas: aliasing e cópia (5.8)
+    \item Listas como parâmetros de funções (5.9)
+  \end{itemize}
+  \begin{alertblock}{Aula importante}
+    Os conceitos de hoje (\emph{referência}, \emph{alias}, \emph{cópia}) explicam muitos erros ``misteriosos'' em programas com listas.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}[fragile]{Pertinência e remoção}
+\begin{lstlisting}
+primos = [2, 3, 5, 7, 11, 13, 17, 19]
+for i in range(3, 20, 2):
+    if i in primos:
+        print(i, 'está em primos.')
+    else:
+        print(i, 'não está em primos.')
+
+del primos[1:3]       # apaga os índices 1 e 2
+print(primos)         # [2, 7, 11, 13, 17, 19]
+del primos[1]
+print(primos)         # [2, 11, 13, 17, 19]
+\end{lstlisting}
+  \fonte{code/Cap5/prog.5.23\_listas\_pertence.py, 5.24\_listas\_del.py}
+\end{frame}
+
+\begin{frame}[fragile]{Métodos de lista}
+\begin{lstlisting}
+lista = [123, 1, 0, 24, 1, 14]
+lista.append(34)        # acrescenta 34 ao final
+lista.extend([45, 12])  # acrescenta vários itens
+lista.insert(1, 345)    # insere 345 na posição 1
+lista.remove(24)        # remove a primeira ocorrência de 24
+lista.pop()             # retira (e devolve) o último item
+print(lista.count(1))   # quantos 1 existem: 2
+lista.sort()            # ordena NA PRÓPRIA lista
+lista.reverse()         # inverte NA PRÓPRIA lista
+print(lista.index(14))  # posição do primeiro 14
+\end{lstlisting}
+  \fonte{code/Cap5/prog.5.25\_listas\_comandos.py}
+\end{frame}
+
+\begin{frame}[fragile]{Métodos que \emph{alteram} \emph{versus} funções que \emph{devolvem}}
+\begin{lstlisting}
+lista = [3, 1, 2]
+nova = sorted(lista)    # devolve outra lista ordenada
+print(lista, nova)      # [3, 1, 2] [1, 2, 3]
+lista.sort()            # altera a própria lista; devolve None!
+print(lista)            # [1, 2, 3]
+x = lista.sort()
+print(x)                # None  <- erro clássico
+\end{lstlisting}
+  \begin{alertblock}{Erro comum}
+    \texttt{lista = lista.sort()} apaga a lista (guarda \texttt{None}). Métodos que modificam no lugar normalmente devolvem \texttt{None}.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{append} \emph{versus} \texttt{extend} (Exercícios 5.17 e 5.18)}
+\begin{lstlisting}
+a = [1, 2, 3]
+a.append([4, 5])
+print(a)               # [1, 2, 3, [4, 5]]   lista dentro de lista!
+
+b = [1, 2, 3]
+b.extend([4, 5])
+print(b)               # [1, 2, 3, 4, 5]
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{append(x)} adiciona \emph{um} elemento (\texttt{x}, seja o que for)
+    \item \texttt{extend(seq)} adiciona \emph{cada elemento} de \texttt{seq}
+    \item Também: \texttt{a += [4, 5]} equivale a \texttt{extend}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Duas variáveis, uma lista: \emph{aliasing}}
+\begin{lstlisting}
+lista1 = [1, 2, 3]
+lista2 = lista1          # NÃO copia: só dá outro nome
+lista2[1] = 42
+print(lista1)            # [1, 42, 3]
+print(lista2)            # [1, 42, 3]
+x = 30
+y = x
+y = 42
+print('x =', x)          # 30
+print('y =', y)          # 42
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{lista2 = lista1} faz as duas variáveis apontarem para \alert{o mesmo objeto}
+    \item Com números (imutáveis) isso não incomoda; com listas, sim!
+  \end{itemize}
+  \fonte{code/Cap5/prog.5.28\_listas\_alias.py}
+\end{frame}
+
+\begin{frame}[fragile]{Variáveis são etiquetas}
+  \begin{center}
+  \begin{tikzpicture}[caixa/.style={draw=uerjazul,fill=uerjcinza,minimum height=0.7cm,minimum width=0.9cm},
+      seta/.style={-{Stealth},thick,uerjazul}]
+    \node at (-2.5,2.2) {\texttt{lista2 = lista1}};
+    \node (l1) at (-3.2,1) {\texttt{lista1}};
+    \node (l2) at (-3.2,0) {\texttt{lista2}};
+    \node[caixa] (a) at (0,0.5) {1};
+    \node[caixa,right=0pt of a] (b) {42};
+    \node[caixa,right=0pt of b] (c) {3};
+    \draw[seta] (l1) -- (a.north west);
+    \draw[seta] (l2) -- (a.south west);
+    \node at (4.2,2.2) {\texttt{lista2 = lista1[:]}};
+    \node (m1) at (3,1) {\texttt{lista1}};
+    \node (m2) at (3,-0.5) {\texttt{lista2}};
+    \node[caixa] (d) at (6,1) {1};
+    \node[caixa,right=0pt of d] (e) {2};
+    \node[caixa,right=0pt of e] (f) {3};
+    \node[caixa] (g) at (6,-0.5) {1};
+    \node[caixa,right=0pt of g] (h) {42};
+    \node[caixa,right=0pt of h] (i) {3};
+    \draw[seta] (m1) -- (d);
+    \draw[seta] (m2) -- (g);
+  \end{tikzpicture}
+  \end{center}
+  \small Esquerda: \emph{alias}, um único objeto com duas etiquetas. Direita: \emph{cópia}, dois objetos independentes.
+\end{frame}
+
+\begin{frame}[fragile]{Clonando listas}
+\begin{lstlisting}
+lista1 = [1, 2, 3]
+lista2 = lista1[:]        # cópia por fatiamento
+lista2[1] = 42
+print(lista1)             # [1, 2, 3]
+print(lista2)             # [1, 42, 3]
+\end{lstlisting}
+  \textbf{Outras formas de copiar:}
+\begin{lstlisting}
+lista3 = list(lista1)
+lista4 = lista1.copy()
+\end{lstlisting}
+  \begin{itemize}
+    \item Também é cópia: \texttt{lista2 = [1, 2, 3]} (criar uma lista nova com o mesmo conteúdo)
+  \end{itemize}
+  \fonte{code/Cap5/prog.5.29\_listas\_fatiada.py, 5.27\_listas\_sem\_alias.py}
+\end{frame}
+
+\begin{frame}[fragile]{Listas como parâmetros}
+\begin{lstlisting}
+def muda_valor(param):
+    param += 'x'
+    print('Dentro da função:', param)
+
+lista = ['a', 'b', 'c']
+palavra = 'abc'
+muda_valor(lista)       # Dentro da função: ['a', 'b', 'c', 'x']
+muda_valor(palavra)     # Dentro da função: abcx
+print("lista =", lista)     # ['a', 'b', 'c', 'x']  <- mudou!
+print("palavra =", palavra) # abc                   <- igual
+\end{lstlisting}
+  \begin{itemize}
+    \item Objetos \textbf{mutáveis} (listas) podem ser alterados pela função; \textbf{imutáveis} (números, strings) não
+    \item Resolve o mistério da Aula 11: Python passa a \emph{referência} ao objeto
+  \end{itemize}
+  \fonte{code/Cap6/prog.6.08\_passagem\_listas\_strings.py}
+\end{frame}
+
+\begin{frame}[fragile]{Boa prática: não alterar o argumento sem avisar}
+\begin{lstlisting}
+def dobra(lista):
+    """Devolve uma NOVA lista com os valores dobrados."""
+    return [2 * x for x in lista]
+
+def dobra_no_lugar(lista):
+    """Altera a lista recebida (retorna None)."""
+    for i in range(len(lista)):
+        lista[i] *= 2
+
+a = [1, 2, 3]
+b = dobra(a)           # a continua [1, 2, 3]
+dobra_no_lugar(a)      # agora a = [2, 4, 6]
+\end{lstlisting}
+  \small Documente na docstring se a função modifica o argumento. Na dúvida, \alert{devolva uma nova lista}.
+\end{frame}
+
+\begin{frame}[fragile]{Atividade: preveja a saída}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+a = [1, 2, 3]
+b = a
+c = a[:]
+b.append(4)
+c.append(5)
+print(a, b, c)
+\end{lstlisting}
+    \column{0.5\textwidth}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+def f(l):
+    l = l + [9]
+def g(l):
+    l.append(9)
+x = [1]; f(x); print(x)
+g(x); print(x)
+\end{lstlisting}
+  \end{columns}
+  \vspace{1ex}
+  \small\textbf{Respostas:} (esq.) \texttt{[1, 2, 3, 4] [1, 2, 3, 4] [1, 2, 3, 5]}; (dir.) \texttt{[1]} e depois \texttt{[1, 9]}. Em \texttt{f}, \texttt{l + [9]} cria uma \emph{nova} lista e reatribui o parâmetro local.
+\end{frame}
+
+\exercicios{5}{%
+  \begin{itemize}\small
+    \item \textbf{5.17, 5.18} (\texttt{append} \emph{vs.} \texttt{extend}), \textbf{5.19} (passo \(-1\)), \textbf{5.20} (inverter com compreensão)
+    \item \textbf{5.21 a 5.24} (metades de uma lista), \textbf{5.25} (divisíveis por 7 e não por 3), \textbf{5.26} (média)
+  \end{itemize}}
+
+\resumo{
+  \item Métodos: \texttt{append}, \texttt{extend}, \texttt{insert}, \texttt{remove}, \texttt{pop}, \texttt{sort}, \texttt{reverse}, \texttt{count}, \texttt{index}
+  \item \texttt{b = a} \alert{não} copia uma lista; use \texttt{a[:]}, \texttt{list(a)} ou \texttt{a.copy()}
+  \item Funções recebem a referência: listas passadas podem ser alteradas
+  \item Próxima aula: matrizes e tabelas de dados
+}
+
+\end{document}

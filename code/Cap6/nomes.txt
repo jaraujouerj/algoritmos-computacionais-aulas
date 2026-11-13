@@ -1,0 +1,3 @@
+Niklaus Wirth
+John von Newmman
+Dennis Ritchie

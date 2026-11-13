@@ -1,0 +1,223 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{11}{Parâmetros e Escopo}{Passagem de parâmetros, variáveis globais e locais, vários retornos}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Parâmetros posicionais, nomeados e com valor padrão
+    \item Funções que retornam mais de um resultado (Cap.~4.4)
+    \item Passagem de parâmetros: valor ou referência? (4.5)
+    \item Variáveis globais e locais: escopo (4.6)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Parâmetros com valor padrão e nomeados}
+\begin{lstlisting}
+def imprime_linha(n=5, carac='*'):
+    print(carac * n)
+
+imprime_linha()                 # *****
+imprime_linha(3)                # ***
+imprime_linha(3, '-')           # ---
+imprime_linha(carac='@', n=2)   # @@
+\end{lstlisting}
+  \begin{itemize}
+    \item \textbf{Valor padrão}: usado quando o argumento é omitido
+    \item \textbf{Argumentos nomeados}: a ordem deixa de importar e o código fica mais claro
+    \item Parâmetros com padrão devem vir \alert{depois} dos obrigatórios
+  \end{itemize}
+  \fonte{code/Cap4/prog.4.12\_imprimepadrao.py}
+\end{frame}
+
+\begin{frame}[fragile]{Retornando mais de um resultado}
+\begin{lstlisting}
+import random as r
+
+def gera_coordenadas_aleatorias():
+    """Gera par de coordenadas aleatórias."""
+    x = r.random()
+    y = r.random()
+    return x, y
+
+x, y = gera_coordenadas_aleatorias()
+print(x, y)
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{return x, y} devolve uma \textbf{tupla} (veremos na Aula 20)
+    \item O chamador \emph{desempacota}: \texttt{x, y = \ldots}
+    \item Exemplos: quociente e resto; mínimo e máximo; \(\pi\) estimado e o erro
+  \end{itemize}
+  \fonte{code/Cap4/prog.4.23\_calcula\_pi\_main.py}
+\end{frame}
+
+\begin{frame}[fragile]{Calculando \(\pi\) por Monte Carlo}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+def coordenadas_dentro_circulo(x, y):
+    """Testa se coordenadas estão dentro do círculo de raio 1."""
+    return m.hypot(x, y) < 1
+
+def calcula_pi(n):
+    """Calcula pi e o erro associado a partir de n pontos."""
+    conta_circulo = 0
+    for i in range(n):
+        x, y = gera_coordenadas_aleatorias()
+        if coordenadas_dentro_circulo(x, y):
+            conta_circulo += 1
+    pi = 4 * conta_circulo / n
+    erro = m.fabs(pi - m.pi)
+    return pi, erro
+\end{lstlisting}
+  \small Ideia: a fração de pontos aleatórios no quarto de círculo aproxima \(\pi/4\). Cada função faz \emph{uma coisa}. (Exercícios 4.12 e 5.6.)\\
+  \fonte{code/Cap4/prog.4.23\_calcula\_pi\_main.py}
+\end{frame}
+
+\begin{frame}[fragile]{O programa principal: a função \texttt{main}}
+\begin{lstlisting}
+def main():
+    num = int(input('Quantos pontos devem ser sorteados? '))
+    pi, erro = calcula_pi(num)
+    print('Com', num, 'pontos, o valor de pi é', pi,
+          'com erro', erro)
+
+main()
+\end{lstlisting}
+  \begin{itemize}
+    \item Convenção: concentrar a entrada/saída em \texttt{main()} e deixar o cálculo nas outras funções
+    \item Funções ``puras'' (só calculam) são fáceis de testar e reutilizar
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Passagem de parâmetros: o valor muda?}
+\begin{lstlisting}
+def foo(num):
+    num = 0
+
+n = 42
+foo(n)
+print('n =', n)
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+n = 42
+\end{lstlisting}
+  \begin{itemize}
+    \item Dentro da função, \texttt{num} é uma \alert{variável local}, só um novo nome para o mesmo valor
+    \item Reatribuir \texttt{num} \emph{não} altera \texttt{n} no programa chamador
+    \item Pergunta clássica: passagem ``por valor'' ou ``por referência''? O livro responde: \textbf{nenhuma das duas} (4.5.1)
+  \end{itemize}
+  \fonte{code/Cap4/prog.4.18\_parametros\_num.py}
+\end{frame}
+
+\begin{frame}[fragile]{Olhando os endereços com \texttt{id()}}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+def foo(n):
+    print('n - id:', id(n), 'valor:', n, 'em foo ')
+    n = 0
+    print('n - id:', id(n), 'valor:', n, 'em foo ')
+
+n = 42
+print('n - id:', id(n), 'valor:', n)
+foo(n)
+print('n - id:', id(n), 'valor:', n)
+\end{lstlisting}
+  \begin{itemize}
+    \item Ao entrar, \texttt{n} da função e \texttt{n} global têm o \alert{mesmo \texttt{id}}: apontam para o mesmo objeto \texttt{42}
+    \item Ao fazer \texttt{n = 0}, o nome local passa a apontar para \emph{outro} objeto
+    \item Números e strings são \textbf{imutáveis}; listas (Aula 16 em diante) são mutáveis e se comportam de outro jeito!
+  \end{itemize}
+  \fonte{code/Cap4/prog.4.17\_parametros.py}
+\end{frame}
+
+\begin{frame}[fragile]{Escopo: variáveis globais e locais}
+\begin{lstlisting}
+global_y = 1
+
+def foo(par):          # par existe somente dentro de foo()
+    local_y = 20
+    print('local_y =', local_y)
+    print('global_y =', global_y)   # lê a global
+    for i in range(1, 2):
+        print('i =', i)
+    print('i =', i)
+
+foo(global_y)
+\end{lstlisting}
+  \begin{itemize}
+    \item \textbf{Local}: criada na função; só existe lá dentro (inclusive os parâmetros)
+    \item \textbf{Global}: criada fora das funções; pode ser \emph{lida} em qualquer lugar
+  \end{itemize}
+  \fonte{code/Cap4/prog.4.19\_escopo.py (Exercício 4.15)}
+\end{frame}
+
+\begin{frame}[fragile]{Sombreamento: o mesmo nome, variáveis diferentes}
+\begin{lstlisting}
+y = 1
+
+def foo():
+    y = 42           # cria uma local; não altera a global
+    print('y =', y)
+    print('x =', x)  # x é global, definida abaixo
+
+x = 84
+foo()
+print('y =', y)
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+y = 42
+x = 84
+y = 1
+\end{lstlisting}
+  \fonte{code/Cap4/prog.4.20\_escopo1.py}
+\end{frame}
+
+\begin{frame}[fragile]{Erros de escopo clássicos}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+y = 1
+
+def foo():
+    print('y =', y)   # UnboundLocalError!
+    y = 42            # esta atribuição torna y LOCAL em todo foo
+
+foo()
+\end{lstlisting}
+  \begin{alertblock}{\texttt{UnboundLocalError}}
+    Se a função \emph{atribui} a \texttt{y} em qualquer ponto, \texttt{y} é local em \emph{toda} a função, e usá-la antes de atribuir é um erro.
+  \end{alertblock}
+  \begin{itemize}
+    \item Para modificar de fato uma global: \texttt{global y} (mas \alert{evite}!)
+    \item Melhor: passar dados por \textbf{parâmetros} e devolver com \textbf{\texttt{return}}
+  \end{itemize}
+  \fonte{code/Cap4/prog.4.21\_escopo1erro.py, prog.4.22\_escopo2erro.py}
+\end{frame}
+
+\begin{frame}{Boas práticas com funções}
+  \begin{itemize}
+    \item Uma função \textbf{faz uma coisa} e tem um nome que diz qual
+    \item Entradas via \textbf{parâmetros}, saída via \textbf{\texttt{return}}
+    \item Evite variáveis globais mutáveis: dificultam entender e testar o programa
+    \item Funções curtas (cabem na tela)
+    \item Escreva uma docstring e teste a função com casos simples antes de usá-la
+  \end{itemize}
+  \begin{exampleblock}{Atividade}
+    Identifique as variáveis globais e locais do Programa 4.16 (Exercício 4.15) e explique cada uma em uma frase.
+  \end{exampleblock}
+\end{frame}
+
+\exercicios{4}{%
+  \begin{itemize}\small
+    \item Valores de retorno múltiplos: \textbf{4.12} (\(\pi\) com mais pontos), \textbf{4.13} (dado de 6 lados)
+    \item Escopo: \textbf{4.15}
+    \item Revisão de funções: \textbf{4.8 a 4.11}
+  \end{itemize}}
+
+\resumo{
+  \item Parâmetros podem ter valor padrão e ser passados por nome
+  \item \texttt{return a, b} devolve duas coisas (tupla)
+  \item Reatribuir um parâmetro não altera a variável do chamador
+  \item Variável atribuída na função é local; prefira parâmetros e \texttt{return} a globais
+  \item Próxima aula: organizando programas em módulos
+}
+
+\end{document}

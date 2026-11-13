@@ -1,0 +1,118 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{34 e 35}{Apresentação dos Projetos}{Demonstração, explicação e critérios de avaliação}
+
+\begin{document}
+\capa
+
+\begin{frame}{Como serão as apresentações}
+  \begin{itemize}
+    \item Cada grupo apresenta seu projeto para a turma: \textbf{10 a 12 minutos} + 3 minutos de perguntas
+    \item Todos os integrantes falam
+    \item Ordem definida por sorteio no início da aula 34
+    \item \textbf{Entrega do código} (pasta compactada com instruções) antes da apresentação
+  \end{itemize}
+  \begin{alertblock}{Atenção}
+    Teste a demonstração \emph{no computador que será usado}. Tenha um plano B (capturas de tela ou vídeo curto) caso algo falhe.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{Roteiro sugerido (10 minutos)}
+  \centering\small
+  \begin{tabular}{p{1.3cm}p{7.4cm}p{2.6cm}}
+    \toprule
+    \textbf{Tempo} & \textbf{Conteúdo} & \textbf{Quem}\\
+    \midrule
+    1 min & O problema: qual é, para quem, por que importa & integrante A\\
+    2 min & Visão geral: funcionalidades e estrutura do programa (módulos/funções) & integrante B\\
+    4 min & \textbf{Demonstração ao vivo} com dados reais & integrante A ou C\\
+    2 min & Decisões de projeto e desafios enfrentados (o que deu errado e como resolveram) & integrante C\\
+    1 min & Conclusões: limitações e próximos passos & todos\\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\begin{frame}{Critérios de avaliação}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{block}{Funcionalidade}
+      O programa atende aos requisitos especificados? Funciona com dados diferentes dos do exemplo? Trata entradas inválidas?
+    \end{block}
+    \begin{block}{Organização do código}
+      O código é bem estruturado e fácil de entender? Nomes claros, docstrings, sem repetição?
+    \end{block}
+    \column{0.5\textwidth}
+    \begin{block}{Modularização}
+      O código está organizado em funções e módulos de forma lógica, com cada parte tendo uma responsabilidade?
+    \end{block}
+    \begin{block}{Clareza na explicação}
+      Os alunos explicam claramente as decisões de design e a implementação? Respondem às perguntas?
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Pontos extras e pontos de atenção}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{exampleblock}{Valorizamos}
+      \begin{itemize}\small
+        \item Testes automáticos
+        \item Gráficos bem feitos e interpretados
+        \item Tratamento cuidadoso de erros
+        \item Uso adequado de NumPy/Pandas/Matplotlib
+        \item Instruções de uso claras (\texttt{LEIAME})
+      \end{itemize}
+    \end{exampleblock}
+    \column{0.5\textwidth}
+    \begin{alertblock}{Perdem pontos}
+      \begin{itemize}\small
+        \item Código que só um integrante entende
+        \item Programa que ``quebra'' em entradas simples
+        \item Funções gigantes e repetição
+        \item Apresentação que só lê os slides
+        \item Estourar o tempo
+      \end{itemize}
+    \end{alertblock}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Perguntas que o professor poderá fazer}
+  \begin{itemize}
+    \item Por que escolheram \emph{esta} estrutura de dados (lista, dicionário, DataFrame)?
+    \item O que acontece se o arquivo não existir? E se o usuário digitar texto no lugar de número?
+    \item Mostre a função mais importante e explique linha a linha
+    \item Como vocês testaram? Qual foi o bug mais difícil?
+    \item Onde há variáveis globais? Como removê-las?
+    \item O que faria diferente se começasse hoje? O que falta para uso real?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Dicas para uma boa apresentação}
+  \begin{itemize}
+    \item \textbf{Comece pelo problema}, não pelo código
+    \item Poucos slides, poucas palavras; mostre o \emph{programa rodando}
+    \item Use entradas \textbf{realistas}; mostre também um erro sendo tratado
+    \item Mostre trechos curtos de código (letra grande!) para ilustrar uma decisão
+    \item Treine antes e cronometre
+    \item Assuma as limitações: ``ainda não faz X'' é melhor que ser surpreendido
+  \end{itemize}
+  \begin{exampleblock}{Material de apoio}
+    Cap.~9 do livro e o site \href{\siteurl}{\texttt{\siteurl}}
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Encerramento da disciplina}
+  \begin{itemize}
+    \item O que aprendemos: pensar algoritmicamente, programar em Python, organizar dados, analisar e visualizar
+    \item Isto é o \textbf{começo}: as próximas disciplinas e a vida profissional exigirão programar cada vez mais
+    \item Continue praticando: exercícios adicionais do site, projetos pessoais, dados da sua área
+  \end{itemize}
+  \vspace{1ex}
+  \begin{block}{Para continuar}
+    Estruturas de dados e algoritmos \(\cdot\) Cálculo numérico \(\cdot\) Estatística com Python \(\cdot\) Banco de dados \(\cdot\) Aprendizado de máquina
+  \end{block}
+  \vspace{1ex}
+  \centering\large Obrigado!
+\end{frame}
+
+\end{document}

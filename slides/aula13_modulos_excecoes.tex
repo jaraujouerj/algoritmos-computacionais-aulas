@@ -1,0 +1,216 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{13}{Módulos e Exceções}{Uso de math e random; tratamento de erros com try/except}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Prática com os módulos \texttt{math} e \texttt{random} (Cap.~4.2)
+    \item Simulações com números aleatórios
+    \item Erros em tempo de execução: o que são \emph{exceções}
+    \item \texttt{try}/\texttt{except}: tratando erros (4.7)
+    \item Programas robustos: validar entradas do usuário
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{O módulo \texttt{math}}
+\begin{lstlisting}
+import math
+
+print(math.pi, math.e)                 # constantes
+print(math.sqrt(2), math.pow(2, 10))   # raiz, potência
+print(math.sin(math.radians(30)))      # seno (em radianos!)
+print(math.log(100, 10), math.log10(1000), math.exp(1))
+print(math.floor(3.7), math.ceil(3.2), math.fabs(-4))
+print(math.hypot(3, 4))                # 5.0
+print(math.degrees(math.pi))           # 180.0
+\end{lstlisting}
+  \begin{itemize}
+    \item Funções trigonométricas usam \alert{radianos}: converta com \texttt{radians()}
+    \item Exercício 4.4: explore outras funções no manual (\texttt{factorial}, \texttt{gcd}, \texttt{isclose}\ldots)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Exercícios com \texttt{math}}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \textbf{Exercício 4.2}: tabela de raízes quadradas
+\begin{lstlisting}
+import math
+for n in range(1, 11):
+    print(n, math.sqrt(n))
+\end{lstlisting}
+    \column{0.5\textwidth}
+    \textbf{Exercício 4.3}: quadrado e cubo
+\begin{lstlisting}
+n = int(input("Número: "))
+print(n, n**2, n**3)
+\end{lstlisting}
+  \end{columns}
+  \vspace{1ex}
+  \begin{exampleblock}{Para pensar}
+    \texttt{math.isclose(0.1 + 0.2, 0.3)} devolve \texttt{True}. Por que é melhor que \texttt{==}? (Veja a Aula 2.)
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}[fragile]{O módulo \texttt{random}}
+\begin{lstlisting}
+import random
+
+print(random.random())            # float em [0, 1)
+print(random.randint(1, 6))       # inteiro entre 1 e 6 (inclusive)
+print(random.uniform(10, 20))     # float entre 10 e 20
+print(random.choice(['a', 'b', 'c']))
+random.seed(42)                   # reprodutibilidade
+\end{lstlisting}
+  \begin{itemize}
+    \item Números \emph{pseudoaleatórios}: gerados por uma fórmula; com a mesma \texttt{seed} a sequência se repete
+    \item Úteis em simulações, jogos e testes de programas
+    \item Exercício 4.13: simular o lançamento de um dado de 6 lados
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Simulando 1000 lançamentos de um dado}
+\begin{lstlisting}
+import random
+
+contagem = 0
+total = 1000
+for i in range(total):
+    dado = random.randint(1, 6)
+    if dado == 6:
+        contagem += 1
+print(f"Saiu 6 em {contagem} de {total} lançamentos")
+print(f"Frequência: {contagem/total:.3f} (esperado: {1/6:.3f})")
+\end{lstlisting}
+  \begin{itemize}
+    \item \alert{Lei dos grandes números}: quanto mais lançamentos, mais perto de \(1/6\)
+    \item O mesmo princípio estima \(\pi\) no programa Monte Carlo da Aula 11
+  \end{itemize}
+  \fonte{Exercício 4.13; code/Cap4/prog.4.23\_calcula\_pi\_main.py}
+\end{frame}
+
+\begin{frame}[fragile]{Quando o programa quebra}
+\begin{lstlisting}
+x = int(input("Numerador: "))
+y = int(input("Denominador: "))
+print(x / y)
+\end{lstlisting}
+\begin{lstlisting}[style=saida,basicstyle=\ttfamily\scriptsize]
+Numerador: abc
+ValueError: invalid literal for int() with base 10: 'abc'
+
+Numerador: 5
+Denominador: 0
+ZeroDivisionError: division by zero
+\end{lstlisting}
+  \begin{itemize}
+    \item Erros \textbf{de sintaxe} são detectados antes de executar; erros \textbf{em execução} geram uma \alert{exceção}
+    \item Sem tratamento, o programa \emph{termina} com mensagem técnica; o usuário não deveria ver isso
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{try}/\texttt{except}}
+\begin{lstlisting}
+def divide(x, y):
+    """Divide x por y."""
+    try:
+        z = x / y
+        print(z)
+    except ZeroDivisionError:
+        print('Tentativa de divisão por zero')
+
+divide(1, 2)       # 0.5
+divide(1, 0)       # Tentativa de divisão por zero
+\end{lstlisting}
+  \begin{itemize}
+    \item O bloco \texttt{try} é executado; se ocorrer a exceção citada, o fluxo \emph{salta} para o \texttt{except}
+    \item Depois do tratamento o programa continua normalmente
+  \end{itemize}
+  \fonte{code/Cap4/prog.4.25\_divide\_zero.py}
+\end{frame}
+
+\begin{frame}[fragile]{Várias exceções}
+\begin{lstlisting}
+def divide():
+    """Divide x por y."""
+    try:
+        x = int(input('Digite um numerador:'))
+        y = int(input('Digite um denominador:'))
+        print('A divisão de', x, 'por', y, 'é igual a', x/y)
+    except ZeroDivisionError:
+        print('Tentativa de divisão por zero.')
+    except ValueError:
+        print('Número inválido.')
+
+divide()
+\end{lstlisting}
+  \small Cada \texttt{except} trata um tipo diferente de erro; capture só o que sabe tratar (evite \texttt{except:} sem tipo).\\
+  \fonte{code/Cap4/prog.4.26\_divide\_exceto.py (Exercícios 4.16 e 4.17)}
+\end{frame}
+
+\begin{frame}[fragile]{Laço de validação com exceção}
+\begin{lstlisting}
+def main():
+    while True:
+        try:
+            num = int(input('Quantos pontos devem ser sorteados? '))
+            break
+        except ValueError:
+            print('Erro: Somente números são aceitos.')
+    pi, erro = calcula_pi(num)
+    print('Com', num, 'pontos, o valor de pi é', pi,
+          'com erro', erro)
+\end{lstlisting}
+  \begin{itemize}
+    \item Padrão clássico: \texttt{while True} + \texttt{try} + \texttt{break} ao dar certo
+    \item O usuário só avança quando a entrada é válida
+  \end{itemize}
+  \fonte{code/Cap4/prog.4.24\_calcula\_pi\_try.py}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{else} e \texttt{finally}}
+\begin{lstlisting}
+try:
+    valor = float(input("Valor: "))
+except ValueError:
+    print("Não é um número.")
+else:
+    print("Você digitou", valor)      # só se NÃO houve exceção
+finally:
+    print("Fim da leitura.")          # sempre executa
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{else}: código que depende do sucesso do \texttt{try}
+    \item \texttt{finally}: limpeza obrigatória (por exemplo, \alert{fechar um arquivo}: Aula 23)
+    \item Exceções comuns: \texttt{ValueError}, \texttt{ZeroDivisionError}, \texttt{IndexError}, \texttt{KeyError}, \texttt{FileNotFoundError}, \texttt{TypeError}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Atividades}
+  \begin{enumerate}
+    \item \textbf{Exercício 4.16:} crie uma lista com 3 elementos e peça ao usuário um índice; mostre o elemento. Capture \texttt{IndexError} (índice fora da lista).
+    \item \textbf{Exercício 4.17:} acrescente a captura de \texttt{ValueError} (digitou texto).
+    \item Escreva \texttt{le\_inteiro(mensagem)}: pede até o usuário digitar um inteiro válido e o devolve. Use-a em seus programas de agora em diante!
+    \item Simule 10\,000 lançamentos de dois dados e mostre a frequência de cada soma (2 a 12). Qual é a mais frequente?
+  \end{enumerate}
+\end{frame}
+
+\exercicios{4}{%
+  \begin{itemize}\small
+    \item Módulos: \textbf{4.1 a 4.4}, \textbf{4.13} (dado de 6 lados)
+    \item Exceções: \textbf{4.16, 4.17}
+    \item Veja também \textbf{5.3} (Fahrenheit com \texttt{try}/\texttt{except}) no Capítulo 5
+  \end{itemize}}
+
+\resumo{
+  \item \texttt{math}: constantes e funções matemáticas (ângulos em radianos)
+  \item \texttt{random}: números pseudoaleatórios para simulações
+  \item Exceção = erro em tempo de execução; \texttt{try}/\texttt{except} impede o programa de ``quebrar''
+  \item Capture o tipo de erro que você sabe tratar
+  \item Próxima aula: revisão geral dos capítulos 1 a 4
+}
+
+\end{document}

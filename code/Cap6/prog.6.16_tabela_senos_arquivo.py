@@ -1,0 +1,10 @@
+import math
+
+arquivo = open('tabelaSenoCosseno.txt', 'w')
+arquivo.write ('{:>9}{:>9}{:>9}{:>9}'.format('Graus',
+      'Radianos','Seno','Cosseno'))
+for graus in range(0,361,30):
+    rad = math.radians(graus)
+    arquivo.write('{:>9.2f}{:>9.2f}{:>9.2f}{:>9.2f}'.format(graus, 
+    rad, math.sin(rad), math.cos(rad)))
+arquivo.close()

@@ -1,0 +1,183 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{09}{Laboratório de Problemas Reais}{Validação de dados, médias e regras de negócio}
+
+\begin{document}
+\capa
+
+\begin{frame}{Plano do laboratório}
+  \begin{itemize}
+    \item Aula prática: o computador está aberto, o livro está fechado
+    \item Problemas com cara de \textbf{engenharia}: validar entradas, calcular médias, aplicar regras
+    \item Método: \alert{entender \(\to\) planejar \(\to\) codificar \(\to\) testar}
+    \item Em duplas; ao fim de cada problema, compare com o site do livro
+  \end{itemize}
+  \begin{block}{Revisão rápida: ferramentas já disponíveis}
+    \texttt{input}/\texttt{print}, tipos (\texttt{int}, \texttt{float}, \texttt{str}), \texttt{if}/\texttt{elif}/\texttt{else}, \texttt{while}, \texttt{for}/\texttt{range}.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Método de resolução em 4 passos}
+  \begin{enumerate}
+    \item \textbf{Entender:} entradas, saídas, restrições. Qual é um exemplo com resposta conhecida?
+    \item \textbf{Planejar:} esboço em pseudocódigo ou fluxograma
+    \item \textbf{Codificar:} um pedaço por vez; execute a cada passo
+    \item \textbf{Testar:} casos típicos, limites e entradas inválidas
+  \end{enumerate}
+  \vspace{1ex}
+  \begin{alertblock}{Erro comum}
+    Começar digitando código sem ter claro o que o programa deve fazer. Capítulo 9 do livro: \emph{Pense antes de programar}.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{Problema 1: média com validação}
+  \begin{exampleblock}{Enunciado}
+    Leia as notas de \(n\) provas de um aluno (\(0 \le \text{nota} \le 10\)). Rejeite notas inválidas pedindo novamente. Ao final, mostre a média e a situação:
+    \begin{itemize}\small
+      \item média \(\ge 7\): aprovado
+      \item \(4 \le\) média \(< 7\): prova final
+      \item média \(< 4\): reprovado
+    \end{itemize}
+  \end{exampleblock}
+  \textbf{Perguntas guia}
+  \begin{itemize}
+    \item Como pedir \emph{novamente} até a nota ser válida? \hfill (\texttt{while})
+    \item Como somar \(n\) valores? \hfill (\texttt{for} + acumulador)
+    \item Quais casos de teste? \hfill (notas 0, 10, 3.9, 4.0, 7.0)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Problema 1: solução comentada}
+\begin{lstlisting}
+n = int(input("Número de provas: "))
+soma = 0
+for i in range(1, n + 1):
+    nota = float(input(f"Nota da prova {i}: "))
+    while nota < 0 or nota > 10:          # validação
+        print("Nota inválida! Use valores entre 0 e 10.")
+        nota = float(input(f"Nota da prova {i}: "))
+    soma += nota
+media = soma / n
+print(f"Média: {media:.2f}")
+if media >= 7:
+    print("Aprovado")
+elif media >= 4:
+    print("Prova final")
+else:
+    print("Reprovado")
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Problema 2: tabela de conversão}
+  \begin{exampleblock}{Enunciado (Exercício 3.14)}
+    Escreva um programa que imprima uma tabela de temperaturas em graus \textbf{Celsius} de \(-20\) a \(40\), de 10 em 10, com a temperatura equivalente em \textbf{Fahrenheit}.
+  \end{exampleblock}
+  \[ F = \frac{9}{5}\,C + 32 \]
+  \textbf{Perguntas guia}
+  \begin{itemize}
+    \item Qual laço? Qual \texttt{range}? \hfill (\texttt{range(-20, 41, 10)})
+    \item Como alinhar colunas? \hfill (formatação \texttt{\{:>8.1f\}})
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Problema 2: solução}
+\begin{lstlisting}
+print(f"{'Celsius':>8}{'Fahrenheit':>12}")
+for c in range(-20, 41, 10):
+    f = 9 / 5 * c + 32
+    print(f"{c:>8}{f:>12.1f}")
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+ Celsius  Fahrenheit
+     -20        -4.0
+     -10        14.0
+       0        32.0
+      10        50.0
+...
+\end{lstlisting}
+  \small Variante: o usuário informa o início, o fim e o passo (e o programa valida que \(\text{passo}>0\)).
+\end{frame}
+
+\begin{frame}{Problema 3: regra de desconto}
+  \begin{exampleblock}{Enunciado}
+    Uma loja concede desconto sobre o valor da compra:
+    \begin{itemize}\small
+      \item compras até R\$\,100: sem desconto
+      \item de R\$\,100 a R\$\,500 (exclusive): 5\%
+      \item R\$\,500 ou mais: 10\%; e \textbf{mais} 2\% se o cliente for ``fidelidade''
+    \end{itemize}
+    Leia valor e se há cartão fidelidade (\texttt{s}/\texttt{n}); mostre o valor final.
+  \end{exampleblock}
+  \textbf{Pontos de atenção}
+  \begin{itemize}
+    \item Aceitar \texttt{S} e \texttt{s}; rejeitar outras respostas (validação)
+    \item Descontos \emph{somam} ou \emph{compõem}? Defina a regra antes de programar!
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Problema 3: solução}
+\begin{lstlisting}
+valor = float(input("Valor da compra: R$ "))
+resp = input("Cliente fidelidade (s/n)? ").lower()
+while resp not in ("s", "n"):
+    resp = input("Responda s ou n: ").lower()
+
+if valor >= 500:
+    desc = 0.10
+elif valor >= 100:
+    desc = 0.05
+else:
+    desc = 0.0
+if valor >= 500 and resp == "s":
+    desc += 0.02
+final = valor * (1 - desc)
+print(f"Desconto de {desc*100:.0f}% -> R$ {final:.2f}")
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Problema 4: série histórica simples}
+  \begin{exampleblock}{Enunciado}
+    Leia as temperaturas diárias (em \textdegree C) de uma semana (7 valores). Mostre a \textbf{média}, a \textbf{maior} e a \textbf{menor} temperatura e quantos dias ficaram acima da média.
+  \end{exampleblock}
+  \begin{itemize}
+    \item Dá para resolver \alert{sem listas}? Maior e menor com variáveis auxiliares, mas ``dias acima da média'' exige guardar os valores
+    \item Esse é o motivo de existirem \textbf{listas} (Aula 16 em diante)
+  \end{itemize}
+  \begin{block}{Desafio extra para quem terminar}
+    Resolva sem listas as três primeiras partes e anote o que não foi possível. Guarde sua solução: voltaremos a ela na Aula 17.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Depuração: erros comuns observados}
+  \centering\small
+  \begin{tabular}{p{4.2cm}p{7.2cm}}
+    \toprule
+    Sintoma & Causa provável\\
+    \midrule
+    \texttt{ValueError} no \texttt{int(input())} & usuário digitou texto ou deixou em branco\\
+    Média errada & esqueceu de converter com \texttt{float}; dividiu por constante errada\\
+    Laço infinito & variável da condição não é atualizada dentro do laço\\
+    Última nota some / sobra uma & \texttt{range(n)} versus \texttt{range(1, n+1)}\\
+    \texttt{IndentationError} & mistura de tabulação e espaços\\
+    Desconto aplicado errado & ordem dos \texttt{if}/\texttt{elif} invertida\\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\exercicios{3}{%
+  \begin{itemize}\small
+    \item Faixas e regras: \textbf{3.7, 3.8, 3.9, 3.10}
+    \item Médias e repetição: \textbf{3.11, 3.12, 3.13, 3.14}
+    \item Padrões: \textbf{3.15}
+  \end{itemize}
+  \vspace{0.5ex}
+  \footnotesize Compare suas soluções com as do site depois de tentar sozinho.}
+
+\resumo{
+  \item Validar a entrada com \texttt{while} é padrão em programas reais
+  \item Primeiro as regras no papel, depois o código
+  \item Teste os valores de fronteira (0, 4, 7, 10, \ldots)
+  \item Próxima aula: subalgoritmos (funções)
+}
+
+\end{document}

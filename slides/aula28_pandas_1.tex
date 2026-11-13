@@ -1,0 +1,232 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{28}{Introdução ao Pandas}{DataFrames, leitura de arquivos, seleção e filtros}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Por que Pandas? Tabelas de dados em Python
+    \item \texttt{DataFrame} e \texttt{Series}
+    \item Carregando dados: \texttt{read\_csv}
+    \item Conhecendo os dados: \texttt{shape}, \texttt{columns}, \texttt{dtypes}, \texttt{info}, \texttt{head}
+    \item Selecionando colunas e linhas: \texttt{[ ]}, \texttt{loc}, \texttt{iloc}
+    \item Filtros, novas colunas e ordenação
+  \end{itemize}
+  \vspace{1ex}
+  {\footnotesize Baseado no notebook \texttt{notebooks/introducao\_ao\_pandas.ipynb}, que por sua vez segue \emph{Pandas for Everyone} (D.~Chen).}
+\end{frame}
+
+\begin{frame}{De listas de dicionários ao DataFrame}
+  \begin{columns}[T]
+    \column{0.52\textwidth}
+    \begin{itemize}
+      \item Na Aula 20 modelamos uma tabela como \textbf{lista de dicionários}
+      \item Funciona, mas cada operação (filtrar, agrupar, média) exige \emph{laços} escritos por nós
+      \item O \textbf{Pandas} oferece a tabela pronta: o \texttt{DataFrame}
+    \end{itemize}
+    \column{0.45\textwidth}
+    \begin{block}{Pandas}
+      Biblioteca para análise de dados tabulares, construída sobre o NumPy. Instalação:\\
+      \texttt{pip install pandas}\\[0.5ex]
+      \texttt{import pandas as pd}
+    \end{block}
+  \end{columns}
+  \vspace{1ex}
+  \textbf{Duas estruturas:} \texttt{DataFrame} (tabela: linhas \(\times\) colunas) e \texttt{Series} (uma coluna).
+\end{frame}
+
+\begin{frame}[fragile]{Carregando dados}
+  Arquivo \texttt{dadosproducao.csv} (60 peças produzidas em 4 máquinas):
+\begin{lstlisting}
+import pandas as pd
+
+df = pd.read_csv("dadosproducao.csv")
+print(df.head(3))
+\end{lstlisting}
+\begin{lstlisting}[style=saida,basicstyle=\ttfamily\scriptsize]
+   id_peca maquina operador  turno         timestamp  tempo_ciclo_seg    status defeito
+0     1000      M1      Ana  Noite  2026-08-03 06:04             31.6  Aprovado     NaN
+1     1001      M1     Elis  Tarde  2026-08-03 06:07             34.5  Aprovado     NaN
+2     1002      M2    Bruno  Noite  2026-08-03 06:18             24.9  Aprovado     NaN
+\end{lstlisting}
+  \small \texttt{NaN} = valor ausente (célula vazia no CSV). Arquivos separados por tabulação (\texttt{.tsv}): \texttt{pd.read\_csv(arq, sep='\textbackslash t')}, como no \emph{gapminder} do notebook.
+\end{frame}
+
+\begin{frame}[fragile]{Conhecendo os dados}
+\begin{lstlisting}
+print(df.shape)       # (60, 8)   atributo: SEM parênteses
+print(df.columns)     # nomes das colunas
+print(df.dtypes)      # tipo de cada coluna
+df.info()             # resumo: colunas, tipos, não-nulos
+print(df.describe())  # estatísticas das colunas numéricas
+\end{lstlisting}
+\begin{lstlisting}[style=saida,basicstyle=\ttfamily\scriptsize]
+       id_peca  tempo_ciclo_seg
+count    60.00            60.00
+mean   1029.50            33.44
+std      17.46             7.02
+min    1000.00            20.90
+50%    1029.50            31.00
+...
+\end{lstlisting}
+  \begin{itemize}\small
+    \item \texttt{shape}, \texttt{columns}, \texttt{dtypes} são \emph{atributos}; \texttt{info()}, \texttt{head()}, \texttt{describe()} são \emph{métodos} (com parênteses!)
+    \item Cada coluna tem \textbf{um tipo}; cada linha pode misturar tipos (\texttt{int64}, \texttt{float64}, texto)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Selecionando colunas}
+\begin{lstlisting}
+maquinas = df["maquina"]            # UMA coluna -> Series
+print(type(maquinas))               # pandas Series
+print(maquinas.head(3).tolist())    # ['M1', 'M1', 'M2']
+
+sub = df[["maquina", "status"]]     # VÁRIAS colunas -> DataFrame
+print(sub.head(2))                  # (lista dentro dos colchetes!)
+\end{lstlisting}
+  \begin{itemize}
+    \item Uma coluna: \texttt{df["nome"]} devolve \textbf{Series}
+    \item Várias: precisa de uma \alert{lista} dentro dos colchetes (dois pares de colchetes) e devolve \textbf{DataFrame}
+    \item \texttt{df[0]} dá erro: colchetes simples aceitam \emph{nomes de colunas}, não posições
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Selecionando linhas: \texttt{loc} e \texttt{iloc}}
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+    \begin{block}{\texttt{.loc[ ]}}
+      seleciona pelo \textbf{rótulo} (nome) do índice\\
+      \texttt{df.loc[0]}\\
+      \texttt{df.loc[[0, 5, 59]]}\\
+      \texttt{df.loc[0, "maquina"]}
+    \end{block}
+    \column{0.48\textwidth}
+    \begin{block}{\texttt{.iloc[ ]}}
+      seleciona pela \textbf{posição} (número da linha)\\
+      \texttt{df.iloc[0]}\\
+      \texttt{df.iloc[[0, 5, -1]]}\\
+      \texttt{df.iloc[0, 1]}
+    \end{block}
+  \end{columns}
+  \vspace{1ex}
+\begin{lstlisting}
+print(df.iloc[-1])                  # última linha (iloc aceita -1)
+print(df.loc[df.shape[0] - 1])      # equivalente, com loc
+print(df.loc[:, ["id_peca", "tempo_ciclo_seg"]])  # todas as linhas
+print(df.iloc[:5, :3])              # 5 primeiras linhas, 3 primeiras colunas
+\end{lstlisting}
+  \small Sintaxe \texttt{df.loc[linhas, colunas]}; o \texttt{:} significa ``todos'' e funciona como o fatiamento de listas. Use \textbf{nomes} sempre que possível: o código fica legível.
+\end{frame}
+
+\begin{frame}[fragile]{Filtros booleanos (como na Aula 21)}
+\begin{lstlisting}
+retrabalho = df[df["status"] == "Retrabalho"]
+print(len(retrabalho))                       # 11
+
+lentas = df[df["tempo_ciclo_seg"] > 40]
+m3_lentas = df[(df["maquina"] == "M3") & (df["tempo_ciclo_seg"] > 50)]
+print(m3_lentas[["id_peca", "tempo_ciclo_seg"]])
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+    id_peca  tempo_ciclo_seg
+46     1046             52.4
+51     1051             52.3
+\end{lstlisting}
+  \begin{itemize}\small
+    \item Condição \(\to\) máscara \texttt{True}/\texttt{False} por linha \(\to\) \texttt{df[máscara]} mantém as linhas verdadeiras
+    \item Combine com \texttt{\&} (e), \texttt{|} (ou), \texttt{\textasciitilde} (não), \alert{cada condição entre parênteses}
+    \item Também: \texttt{df["maquina"].isin(["M1", "M2"])}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Novas colunas e ordenação}
+\begin{lstlisting}
+df["tempo_min"] = df["tempo_ciclo_seg"] / 60           # coluna calculada
+df["com_defeito"] = df["status"] != "Aprovado"         # coluna booleana
+
+mais_lentas = df.sort_values("tempo_ciclo_seg", ascending=False)
+print(mais_lentas[["id_peca", "maquina", "tempo_ciclo_seg"]].head(3))
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+    id_peca maquina  tempo_ciclo_seg
+46     1046      M3             52.4
+51     1051      M3             52.3
+12     1012      M3             47.8
+\end{lstlisting}
+  \begin{itemize}\small
+    \item Operações são \emph{vetorizadas} (como no NumPy): nenhum \texttt{for} necessário
+    \item \texttt{sort\_values(coluna, ascending=False)} ordena; \texttt{df.drop(columns=[...])} remove colunas
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Estatísticas rápidas de uma coluna}
+\begin{lstlisting}
+t = df["tempo_ciclo_seg"]
+print(t.mean(), t.median(), t.std())     # 33.44  31.0  7.02
+print(t.min(), t.max())                  # 20.9  52.4
+print(df["status"].value_counts())
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+status
+Aprovado      48
+Retrabalho    11
+Descarte       1
+Name: count, dtype: int64
+\end{lstlisting}
+  \begin{itemize}\small
+    \item \texttt{mean}, \texttt{median}, \texttt{std}, \texttt{min}, \texttt{max}, \texttt{sum}: como no NumPy
+    \item \texttt{value\_counts()} = tabela de frequências (o padrão ``contar ocorrências'' da Aula 20, pronto!)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Exemplo do notebook: \emph{gapminder}}
+\begin{lstlisting}
+df = pd.read_csv("gapminder.tsv", sep="\t")
+print(df.shape)                     # (1704, 6)
+print(df.columns.tolist())
+# ['country', 'continent', 'year', 'lifeExp', 'pop', 'gdpPercap']
+print(df.loc[[0, 99, 999], ["country", "lifeExp", "gdpPercap"]])
+print(df.iloc[:, :3].head(2))       # fatia de colunas por posição
+\end{lstlisting}
+  \begin{itemize}
+    \item Dados históricos (Gapminder): expectativa de vida, população e PIB per capita por país e ano
+    \item O notebook explora as variações de \texttt{loc}, \texttt{iloc}, \texttt{range} e fatias \texttt{[:, ::2]}: experimente cada uma!
+    \item Pergunta do notebook: o que acontece se o \texttt{range} passa do número de colunas?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Atividade no laboratório}
+  Com \texttt{dadosproducao.csv}:
+  \begin{enumerate}
+    \item Mostre o número de linhas e colunas e o tipo de cada coluna.
+    \item Selecione apenas \texttt{id\_peca}, \texttt{operador} e \texttt{tempo\_ciclo\_seg}.
+    \item Liste as peças da máquina M2 produzidas no turno da manhã.
+    \item Quantas peças têm tempo de ciclo maior que a média? E qual a porcentagem?
+    \item Mostre as 5 peças mais rápidas.
+    \item Crie a coluna \texttt{tempo\_min} e a coluna booleana \texttt{rapida} (tempo \(<\) 30\,s).
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Para consultar e praticar}
+  \begin{itemize}
+    \item Notebook: \texttt{notebooks/introducao\_ao\_pandas.ipynb}
+    \item Documentação: \texttt{pandas.pydata.org/docs/}
+    \item Guia \emph{10 minutes to pandas}
+    \item Livro de apoio: D.~Chen, \emph{Pandas for Everyone}
+  \end{itemize}
+  \begin{alertblock}{Dica}
+    Em Jupyter, a última expressão da célula é exibida sozinha: um \texttt{df.head()} dispensa o \texttt{print}.
+  \end{alertblock}
+\end{frame}
+
+\resumo{
+  \item \texttt{DataFrame} = tabela; \texttt{Series} = coluna
+  \item \texttt{pd.read\_csv} carrega; \texttt{shape}, \texttt{dtypes}, \texttt{info()}, \texttt{head()} exploram
+  \item \texttt{df["col"]}, \texttt{df[["a","b"]]}, \texttt{loc} (rótulos) e \texttt{iloc} (posições)
+  \item Filtros: \texttt{df[df.col > valor]}; combine com \texttt{\&} e \texttt{|}
+  \item Próxima aula: agrupamentos, valores ausentes e gráficos com Pandas
+}
+
+\end{document}

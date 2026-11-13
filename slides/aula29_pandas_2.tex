@@ -1,0 +1,237 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{29}{Pandas na Prática}{Agrupamentos, agregações, valores ausentes e gráficos}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Cálculos agrupados: \texttt{groupby} e agregações
+    \item Contagem de frequências: \texttt{value\_counts}, \texttt{nunique}
+    \item Valores ausentes: \texttt{isna}, \texttt{fillna}, \texttt{dropna}
+    \item Datas e horas
+    \item Gráficos direto do Pandas
+    \item Roteiro de uma análise exploratória
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Perguntas típicas de quem analisa dados}
+  \begin{itemize}
+    \item Qual o tempo de ciclo \textbf{médio de cada máquina}?
+    \item Qual a \textbf{taxa de peças com defeito} por turno?
+    \item Quantas peças \textbf{de cada tipo} cada operador produziu?
+    \item (Gapminder) Qual foi a expectativa de vida média \textbf{por ano}? E \textbf{por continente}?
+  \end{itemize}
+  \begin{block}{Padrão: dividir--aplicar--combinar (\emph{split--apply--combine})}
+    \textbf{1.} dividir os dados em grupos \(\to\) \textbf{2.} aplicar um cálculo a cada grupo \(\to\) \textbf{3.} combinar os resultados numa tabela.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{groupby}: médias agrupadas}
+\begin{lstlisting}
+media_por_maquina = df.groupby("maquina")["tempo_ciclo_seg"].mean()
+print(media_por_maquina.round(2))
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+maquina
+M1    32.92
+M2    28.34
+M3    45.28
+M4    30.25
+Name: tempo_ciclo_seg, dtype: float64
+\end{lstlisting}
+  \begin{itemize}\small
+    \item \texttt{groupby("maquina")} agrupa; \texttt{["tempo\_ciclo\_seg"]} escolhe a coluna; \texttt{.mean()} calcula
+    \item O objeto agrupado sozinho não mostra nada útil: falta aplicar a agregação
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Várias estatísticas de uma vez: \texttt{agg}}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+resumo = (
+    df
+    .groupby("maquina")["tempo_ciclo_seg"]
+    .agg(["count", "mean", "std", "min", "max"])
+    .round(2)
+)
+print(resumo)
+\end{lstlisting}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize,style=saida]
+         count   mean   std   min   max
+maquina
+M1          17  32.92  3.55  28.0  38.9
+M2          18  28.34  3.49  20.9  33.6
+M3          12  45.28  3.84  39.9  52.4
+M4          13  30.25  2.00  26.8  34.6
+\end{lstlisting}
+  \small Os parênteses externos permitem o \emph{encadeamento de métodos} em várias linhas (estilo preferido, como no notebook).
+\end{frame}
+
+\begin{frame}[fragile]{Agrupando por mais de uma coluna}
+\begin{lstlisting}
+tab = df.groupby(["maquina", "status"]).size().unstack(fill_value=0)
+print(tab)
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+status   Aprovado  Descarte  Retrabalho
+maquina
+M1             13         1           3
+M2             13         0           5
+M3             10         0           2
+M4             12         0           1
+\end{lstlisting}
+  \begin{itemize}\small
+    \item Agrupar por duas colunas gera um \emph{índice composto}; \texttt{unstack()} transforma o segundo nível em colunas
+    \item \texttt{reset\_index()} volta a ter um DataFrame ``plano'' (os nomes viram colunas comuns)
+    \item No notebook: \texttt{df.groupby(["year", "continent"])[["lifeExp", "gdpPercap"]].mean()}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Taxa de defeitos por máquina e por turno}
+\begin{lstlisting}
+df["com_defeito"] = df["status"] != "Aprovado"          # True/False
+print(df.groupby("maquina")["com_defeito"].mean().round(2))
+print(df.groupby("turno")["com_defeito"].mean().round(3))
+\end{lstlisting}
+\begin{lstlisting}[style=saida,basicstyle=\ttfamily\scriptsize]
+maquina: M1 0.24 | M2 0.28 | M3 0.17 | M4 0.08
+turno:   Manha 0.222 | Noite 0.240 | Tarde 0.118
+\end{lstlisting}
+  \begin{itemize}\small
+    \item A média de uma coluna booleana (\(True=1\)) é a \alert{proporção} de \texttt{True}
+    \item M2 tem a maior taxa de problemas, apesar de M3 ser a mais lenta: tempo e qualidade são perguntas diferentes!
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Frequências: \texttt{value\_counts} e \texttt{nunique}}
+\begin{lstlisting}
+print(df["maquina"].value_counts())            # M2 18, M1 17, M4 13, M3 12
+print(df["operador"].nunique())                # quantos operadores distintos
+print(df.groupby("turno")["operador"].nunique())
+print(df["defeito"].value_counts())            # ignora NaN por padrão
+print(df["turno"].value_counts(normalize=True).round(2))   # proporções
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{value\_counts()}: frequência de cada valor (ordenada)
+    \item \texttt{nunique()}: número de valores \emph{distintos}
+    \item No \emph{gapminder}: \texttt{df.groupby("continent")["country"].nunique()} \(\to\) África 52, Américas 25, Ásia 33, Europa 30, Oceania 2
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Valores ausentes}
+\begin{lstlisting}
+print(df.isna().sum())               # ausentes por coluna
+# defeito: 48 ausentes  (= as 48 peças aprovadas)
+
+df["defeito"] = df["defeito"].fillna("sem defeito")   # preenche
+df.dropna(subset=["tempo_ciclo_seg"])                 # remove linhas
+print(df["defeito"].value_counts().head(3))
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+defeito
+sem defeito    48
+Risco           5
+Trinca          4
+\end{lstlisting}
+  \begin{alertblock}{Decida com critério}
+    Ausente significa ``não se aplica'' (aqui: peça sem defeito) ou ``não foi medido''? Preencher, remover ou manter muda os resultados: documente a decisão.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}[fragile]{Datas e horas}
+\begin{lstlisting}
+df["timestamp"] = pd.to_datetime(df["timestamp"])
+print(df["timestamp"].min(), df["timestamp"].max())
+# 2026-08-03 06:04:00   2026-08-03 12:54:00
+df["hora"] = df["timestamp"].dt.hour
+pecas_por_hora = df.groupby("hora").size()
+print(df["timestamp"].dt.day_name().head(1))    # Monday
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{pd.to\_datetime} converte texto em data/hora; o acessor \texttt{.dt} extrai \texttt{year}, \texttt{month}, \texttt{day}, \texttt{hour}\ldots
+    \item Permite agrupar por mês, semana ou hora, e calcular \emph{intervalos} entre eventos
+    \item Em dados reais, datas costumam vir em formatos variados: confira \texttt{dtypes}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Gráficos direto do Pandas}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+import matplotlib.pyplot as plt
+
+# média por máquina (barras)
+(df.groupby("maquina")["tempo_ciclo_seg"]
+   .mean()
+   .plot(kind="bar", rot=0))
+plt.ylabel("Tempo médio (s)")
+plt.show()
+
+# histograma de uma coluna
+df["tempo_ciclo_seg"].plot(kind="hist",
+                           bins=10)
+\end{lstlisting}
+    \column{0.47\textwidth}
+    \includegraphics[width=\textwidth]{fig_media.png}
+  \end{columns}
+  \begin{itemize}\small
+    \item \texttt{.plot(kind="bar" | "hist" | "box" | "line" | "scatter")}: usa o Matplotlib por baixo
+    \item Para personalizar, use \texttt{fig, ax = plt.subplots()} e passe \texttt{ax=ax} ao \texttt{.plot}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Série temporal do \emph{gapminder}}
+\begin{lstlisting}
+expect_global = df.groupby("year")["lifeExp"].mean()
+print(expect_global.head(3))
+# year
+# 1952    49.057620
+# 1957    51.507401
+# 1962    53.609249
+
+expect_global.plot()
+plt.ylabel("Expectativa de vida média (anos)")
+plt.show()
+\end{lstlisting}
+  \begin{itemize}
+    \item Exemplo final do notebook: o gráfico de linha mostra a \textbf{tendência de crescimento} (de 49 para 67 anos entre 1952 e 2007)
+    \item Visualização e agrupamento \alert{juntos}: é assim que se explora dados
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Roteiro de uma análise exploratória}
+  \begin{enumerate}
+    \item \textbf{Carregar} (\texttt{read\_csv}) e \textbf{conhecer}: \texttt{shape}, \texttt{dtypes}, \texttt{head}, \texttt{describe}
+    \item \textbf{Limpar}: ausentes, tipos (\texttt{to\_datetime}), duplicatas, valores impossíveis
+    \item \textbf{Perguntar}: o que eu quero saber? (taxa, média, comparação, tendência)
+    \item \textbf{Calcular}: filtros, \texttt{groupby}, \texttt{agg}
+    \item \textbf{Visualizar}: o gráfico certo para cada pergunta (Aula 27)
+    \item \textbf{Concluir e documentar}: o que os dados mostram? Quais as limitações?
+  \end{enumerate}
+  \begin{exampleblock}{Este é o esqueleto de muitos projetos finais}
+    Combine: arquivos CSV \(+\) Pandas \(+\) funções bem organizadas \(+\) gráficos \(+\) testes (Aulas 30 a 33).
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Atividade no laboratório}
+  Com \texttt{dadosproducao.csv}:
+  \begin{enumerate}
+    \item Calcule o tempo médio por máquina \emph{e} por turno (tabela com as duas chaves).
+    \item Qual operador produziu mais peças com problema (\texttt{Retrabalho} ou \texttt{Descarte})?
+    \item Qual o defeito mais comum em cada máquina?
+    \item Quantas peças foram produzidas por hora? Faça um gráfico de linha.
+    \item Escreva uma função \texttt{relatorio(df)} que imprime um resumo (totais, taxas e a pior máquina) e uma função que salva dois gráficos em PNG.
+  \end{enumerate}
+  \footnotesize Dica: para o item 3 use \texttt{df.groupby(["maquina","defeito"]).size()}.
+\end{frame}
+
+\resumo{
+  \item \texttt{groupby} + agregação responde perguntas por grupo; \texttt{agg} calcula várias estatísticas
+  \item \texttt{value\_counts} e \texttt{nunique} fazem contagens de frequências
+  \item Valores ausentes: \texttt{isna}, \texttt{fillna}, \texttt{dropna}; decida e documente
+  \item \texttt{.plot()} cria gráficos direto de Series e DataFrames
+  \item Próxima aula: especificação do projeto final
+}
+
+\end{document}

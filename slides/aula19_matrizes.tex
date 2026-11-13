@@ -1,0 +1,214 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{19}{Matrizes}{Tabelas de dados experimentais e pequenas simulações}
+
+\begin{document}
+\capa
+
+\begin{frame}{Roteiro}
+  \begin{itemize}
+    \item Dados em tabela: linhas e colunas (Cap.~5.10)
+    \item Listas de listas (5.11)
+    \item Percorrendo e construindo matrizes
+    \item O erro clássico: \texttt{[[0]*3]*4}
+    \item Aplicações: tabelas experimentais e uma pequena simulação
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Matrizes e tabelas de dados}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    Dados experimentais costumam vir em \textbf{tabelas}:
+    \vspace{1ex}
+    \centering\small
+    \begin{tabular}{c|ccc}
+      Ensaio & \(V\) (V) & \(I\) (A) & \(T\) (\textdegree C)\\\hline
+      1 & 5,0 & 0,25 & 21,3\\
+      2 & 10,0 & 0,52 & 22,1\\
+      3 & 15,0 & 0,76 & 23,4\\
+      4 & 20,0 & 1,01 & 25,0\\
+    \end{tabular}
+    \column{0.45\textwidth}
+    \begin{itemize}
+      \item Cada \textbf{linha} é um ensaio
+      \item Cada \textbf{coluna} é uma grandeza
+      \item Em matemática: matriz \(4\times3\)
+      \item Em Python: uma \textbf{lista de listas}
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Lista de listas}
+\begin{lstlisting}
+ensaios = [
+    [5.0, 0.25, 21.3],
+    [10.0, 0.52, 22.1],
+    [15.0, 0.76, 23.4],
+    [20.0, 1.01, 25.0],
+]
+print(ensaios[1])         # [10.0, 0.52, 22.1]   (uma linha)
+print(ensaios[1][2])      # 22.1   (linha 1, coluna 2)
+print(len(ensaios))       # 4 linhas
+print(len(ensaios[0]))    # 3 colunas
+\end{lstlisting}
+  \begin{itemize}
+    \item Dois índices: \texttt{matriz[linha][coluna]}
+    \item Cada linha é uma lista independente (e poderia ter tamanho diferente!)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Percorrendo uma matriz}
+\begin{lstlisting}
+for i in range(len(ensaios)):
+    for j in range(len(ensaios[i])):
+        print(ensaios[i][j], end='\t')
+    print()
+\end{lstlisting}
+  \textbf{Ou diretamente:}
+\begin{lstlisting}
+for linha in ensaios:
+    for valor in linha:
+        print(valor, end='\t')
+    print()
+
+# resistência (V/I) de cada ensaio
+resistencias = [linha[0] / linha[1] for linha in ensaios]
+# média de cada coluna
+medias = [sum(l[j] for l in ensaios) / len(ensaios) for j in range(3)]
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Construindo uma matriz}
+\begin{lstlisting}
+# matriz 3 x 4 de zeros, usando laços aninhados
+matriz = []
+for i in range(3):
+    linha = []
+    for j in range(4):
+        linha.append(0)
+    matriz.append(linha)
+
+# o mesmo com compreensão aninhada
+matriz = [[0 for j in range(4)] for i in range(3)]
+print(matriz)     # [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+\end{lstlisting}
+  \begin{itemize}
+    \item Exercício 5.27: criar uma matriz bidimensional usando dois comandos \texttt{for}
+    \item Exercício 5.28: matriz \alert{tridimensional} com compreensão (lista de listas de listas)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{O erro clássico}
+\begin{lstlisting}
+matriz = [[0] * 3] * 4
+print(matriz)          # [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+matriz[1][0] = 1
+print(matriz)
+\end{lstlisting}
+\begin{lstlisting}[style=saida]
+[[1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0]]
+\end{lstlisting}
+  \begin{alertblock}{O que aconteceu?}
+    \texttt{[x] * 4} repete a \emph{mesma referência} quatro vezes: as 4 linhas são o \textbf{mesmo objeto} (aliasing da Aula 18). Use a compreensão: \texttt{[[0]*3 for i in range(4)]}.
+  \end{alertblock}
+  \fonte{code/Cap5/prog.5.b\_testematriz.py}
+\end{frame}
+
+\begin{frame}[fragile]{Operações com matrizes}
+\begin{lstlisting}
+def soma(a, b):
+    """Soma duas matrizes de mesmas dimensões."""
+    return [[a[i][j] + b[i][j] for j in range(len(a[0]))]
+            for i in range(len(a))]
+
+def transposta(a):
+    return [[a[i][j] for i in range(len(a))]
+            for j in range(len(a[0]))]
+
+A = [[1, 2, 3], [4, 5, 6]]
+print(transposta(A))    # [[1, 4], [2, 5], [3, 6]]
+\end{lstlisting}
+  \small Para álgebra linear séria (produto de matrizes, inversa, autovalores), usaremos \textbf{NumPy} na próxima aula.
+\end{frame}
+
+\begin{frame}{Pequena simulação: um tabuleiro}
+  \begin{columns}[T]
+    \column{0.55\textwidth}
+    \begin{itemize}
+      \item Matrizes representam \textbf{estados}: tabuleiros, mapas, grades de células
+      \item Exemplo: o ``jogo da velha'' como matriz \(3\times3\)
+      \item Valores: \texttt{' '}, \texttt{'X'}, \texttt{'O'}
+    \end{itemize}
+    \column{0.4\textwidth}
+    \begin{block}{Funções do programa}
+      \small
+      \texttt{novo\_tabuleiro()}\\
+      \texttt{imprime(tab)}\\
+      \texttt{joga(tab, i, j, sim)}\\
+      \texttt{venceu(tab, sim)}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Jogo da velha: estrutura}
+\begin{lstlisting}
+def novo_tabuleiro():
+    return [[' '] * 3 for _ in range(3)]
+
+def imprime(tab):
+    for linha in tab:
+        print(' | '.join(linha))
+        print('-' * 9)
+
+def venceu(tab, s):
+    linhas = any(all(c == s for c in l) for l in tab)
+    colunas = any(all(tab[i][j] == s for i in range(3)) for j in range(3))
+    diag = all(tab[i][i] == s for i in range(3)) or \
+           all(tab[i][2 - i] == s for i in range(3))
+    return linhas or colunas or diag
+\end{lstlisting}
+  \small Cada função faz uma coisa; o jogo completo é um desafio para o laboratório.
+\end{frame}
+
+\begin{frame}[fragile]{Simulação: espalhando calor em uma barra}
+\begin{lstlisting}
+# 1 linha por instante de tempo, 1 coluna por posição
+n, passos = 10, 5
+T = [[0.0] * n for _ in range(passos)]
+T[0][0] = 100.0                       # extremidade quente
+for t in range(1, passos):
+    for x in range(n):
+        esq = T[t-1][x-1] if x > 0 else T[t-1][x]
+        dir_ = T[t-1][x+1] if x < n-1 else T[t-1][x]
+        T[t][x] = (esq + T[t-1][x] + dir_) / 3
+for linha in T:
+    print([round(v, 1) for v in linha])
+\end{lstlisting}
+  \small Cada instante é calculado a partir do anterior: a matriz guarda o \emph{histórico} da simulação. (Esse tipo de problema é muito mais simples em NumPy.)
+\end{frame}
+
+\begin{frame}{Atividade}
+  \begin{enumerate}
+    \item Armazene a tabela de ensaios (tensão, corrente, temperatura) em uma matriz. Calcule a resistência de cada ensaio e a resistência média.
+    \item Escreva \texttt{produto(a, b)}: produto matricial de duas matrizes quadradas \(n\times n\).
+    \item Escreva uma função que verifica se uma matriz quadrada é \textbf{simétrica}.
+    \item Complete o jogo da velha (entrada das jogadas e detecção de empate).
+  \end{enumerate}
+  \vspace{1ex}
+  \small Desafio opcional (livro, Cap.~5): o \textbf{Jogo da Vida} de Conway é uma simulação em matriz; veja \texttt{code/Cap5/prog.5.c\_lifegame.py}.
+\end{frame}
+
+\exercicios{5}{%
+  \begin{itemize}\small
+    \item Listas de listas: \textbf{5.27} (matriz com \texttt{for}), \textbf{5.28} (matriz tridimensional)
+    \item Revise também \textbf{5.5} e \textbf{5.9} (listas e fatias)
+  \end{itemize}}
+
+\resumo{
+  \item Matriz = lista de listas; acesso \texttt{m[i][j]}
+  \item Use compreensão aninhada para criar matrizes: \texttt{[[0]*c for \_ in range(l)]}
+  \item Nunca use \texttt{[[0]*c]*l}: as linhas ficam compartilhadas
+  \item Próxima aula: dicionários e tuplas
+}
+
+\end{document}

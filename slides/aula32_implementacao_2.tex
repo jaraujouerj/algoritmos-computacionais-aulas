@@ -1,0 +1,182 @@
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\usepackage{ac1}
+\aulainfo{32}{Implementação 2}{Listas e dicionários, arquivos e tratamento de erros}
+
+\begin{document}
+\capa
+
+\begin{frame}{Objetivo da aula}
+  \begin{itemize}
+    \item Completar as funcionalidades essenciais e acrescentar as desejáveis
+    \item Uso \textbf{consistente} de listas e dicionários
+    \item \textbf{Persistência}: gravar e carregar dados em arquivos
+    \item \textbf{Tratamento de erros}: o programa não pode ``quebrar'' por culpa do usuário
+    \item Feedback contínuo para garantir a qualidade do código
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Persistência em CSV: carregar e salvar}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+import csv
+
+def carrega_estoque(caminho):
+    """Lê o CSV e devolve o dicionário de insumos (vazio se não existir)."""
+    estoque = {}
+    try:
+        with open(caminho, newline="", encoding="utf-8") as f:
+            for linha in csv.DictReader(f):
+                estoque[linha["nome"]] = {
+                    "unidade": linha["unidade"],
+                    "preco": float(linha["preco"]),
+                    "qtd": float(linha["qtd"]),
+                    "minimo": float(linha["minimo"]),
+                }
+    except FileNotFoundError:
+        print("Arquivo não encontrado: começando com estoque vazio.")
+    return estoque
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Persistência em CSV: salvar}
+\begin{lstlisting}
+def salva_estoque(estoque, caminho):
+    """Grava o estoque em CSV."""
+    campos = ["nome", "unidade", "preco", "qtd", "minimo"]
+    with open(caminho, "w", newline="", encoding="utf-8") as f:
+        escritor = csv.DictWriter(f, fieldnames=campos)
+        escritor.writeheader()
+        for nome, dados in estoque.items():
+            escritor.writerow({"nome": nome, **dados})
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{**dados} \emph{desempacota} o dicionário interno junto com o nome
+    \item \textbf{Regra:} carregue ao iniciar e salve ao sair \emph{e} após cada alteração importante
+    \item Teste: salve, feche o programa, abra de novo: os dados voltaram?
+    \item Se usam Pandas: \texttt{pd.read\_csv} e \texttt{df.to\_csv(caminho, index=False)}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Validando entradas}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+def le_float(mensagem, minimo=0.0):
+    """Pede um número até o usuário digitar um valor válido (>= minimo)."""
+    while True:
+        try:
+            valor = float(input(mensagem).replace(",", "."))
+        except ValueError:
+            print("Digite um número, por exemplo 12.5.")
+            continue
+        if valor < minimo:
+            print(f"O valor deve ser pelo menos {minimo}.")
+            continue
+        return valor
+
+preco = le_float("Preço unitário (R$): ")
+\end{lstlisting}
+  \small Uma só função de leitura segura, reutilizada em todo o programa (ver Aula 13). Faça também \texttt{le\_inteiro} e \texttt{le\_opcao}.
+\end{frame}
+
+\begin{frame}[fragile]{Funções que sinalizam erros}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+def baixa_estoque(estoque, nome, qtd):
+    """Retira qtd do estoque. Levanta KeyError ou ValueError."""
+    if nome not in estoque:
+        raise KeyError(f"Insumo '{nome}' não cadastrado")
+    if qtd > estoque[nome]["qtd"]:
+        raise ValueError("Estoque insuficiente")
+    estoque[nome]["qtd"] -= qtd
+
+# no menu:
+try:
+    baixa_estoque(estoque, nome, qtd)
+    print("Saída registrada.")
+except (KeyError, ValueError) as erro:
+    print("Não foi possível:", erro)
+\end{lstlisting}
+  \small \texttt{raise} sinaliza o problema \emph{onde} ele é detectado; quem chama decide \emph{como} tratar (mensagem, nova tentativa\ldots). A função de cálculo não conversa com o usuário.
+\end{frame}
+
+\begin{frame}[fragile]{Relatórios e gráficos}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+import matplotlib.pyplot as plt
+
+def grafico_mais_caros(estoque, n=5, arquivo="mais_caros.png"):
+    """Barras dos n insumos de maior preço unitário."""
+    itens = sorted(estoque.items(), key=lambda par: par[1]["preco"],
+                   reverse=True)[:n]
+    nomes = [nome for nome, _ in itens]
+    precos = [dados["preco"] for _, dados in itens]
+    fig, ax = plt.subplots()
+    ax.bar(nomes, precos)
+    ax.set_ylabel("Preço unitário (R$)")
+    ax.set_title(f"Os {len(nomes)} insumos mais caros")
+    fig.savefig(arquivo, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+\end{lstlisting}
+  \small A função \emph{devolve o arquivo} em vez de abrir uma janela: assim pode ser usada sem interação e testada.
+\end{frame}
+
+\begin{frame}[fragile]{Com Pandas: análise de um CSV}
+\begin{lstlisting}
+import pandas as pd
+
+def resumo_por_maquina(caminho):
+    """Tabela com contagem, tempo médio e taxa de defeitos por máquina."""
+    df = pd.read_csv(caminho)
+    df["com_defeito"] = df["status"] != "Aprovado"
+    return (df.groupby("maquina")
+              .agg(pecas=("id_peca", "count"),
+                   tempo_medio=("tempo_ciclo_seg", "mean"),
+                   taxa_defeitos=("com_defeito", "mean"))
+              .round(2))
+
+print(resumo_por_maquina("dadosproducao.csv"))
+\end{lstlisting}
+  \small \texttt{agg(nome=(coluna, função))} produz colunas com nomes escolhidos por você. Separe \emph{calcular} (esta função) de \emph{apresentar} (\texttt{print}, gráfico, arquivo).
+\end{frame}
+
+\begin{frame}{Erros que o programa deve tratar}
+  \centering\small
+  \begin{tabular}{p{5cm}p{6cm}}
+    \toprule
+    \textbf{Situação} & \textbf{Como tratar}\\
+    \midrule
+    entrada que não é número & \texttt{ValueError} \(\to\) pedir de novo\\
+    opção de menu inexistente & mensagem e volta ao menu\\
+    arquivo ausente ou vazio & \texttt{FileNotFoundError}; começar vazio\\
+    linha malformada no CSV & ignorar com aviso (\texttt{try} por linha)\\
+    divisão por zero (média sem dados) & verificar antes ou \texttt{ZeroDivisionError}\\
+    chave inexistente no dicionário & \texttt{in}, \texttt{get} ou \texttt{KeyError}\\
+    \bottomrule
+  \end{tabular}
+  \vspace{1ex}
+
+  \footnotesize Teste cada caso digitando propositalmente o valor errado.
+\end{frame}
+
+\begin{frame}{Atividade e entrega parcial}
+  \begin{enumerate}
+    \item Complete as funcionalidades essenciais; sem alterá-las por enquanto, deixem o ``extra'' para depois
+    \item Implemente \textbf{carregar e salvar} dados; verifique a \emph{persistência}
+    \item Use funções de leitura \textbf{validadas} para toda entrada do usuário
+    \item Registre os \textbf{erros tratados} e os que ainda falta tratar
+    \item Mostre o programa ao professor: faça uma sessão de uso completa
+  \end{enumerate}
+  \begin{alertblock}{Atenção ao prazo}
+    Na Aula 33 o foco muda: \textbf{refatoração e testes}. Funcionalidades novas só se sobrar tempo.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{Checklist de implementação 2}
+  \small
+  \begin{tabular}{@{}cl@{}}
+    $\square$ & Os dados persistem entre execuções?\\
+    $\square$ & Toda entrada do usuário é validada?\\
+    $\square$ & Arquivos são abertos com \texttt{with} e erros de arquivo são tratados?\\
+    $\square$ & Listas/dicionários são usados de forma consistente (mesma estrutura em todo o código)?\\
+    $\square$ & Há ao menos 1 gráfico ou relatório gerado automaticamente?\\
+    $\square$ & Cálculo, entrada/saída e arquivos estão em funções/módulos separados?\\
+  \end{tabular}
+\end{frame}
+
+\end{document}
