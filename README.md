@@ -1,7 +1,11 @@
 # Algoritmos Computacionais I: slides e exemplos
 
-Material da disciplina **Algoritmos Computacionais I** (UERJ), para alunos de engenharia,
+Material da disciplina **Algoritmos Computacionais I** (UERJ), dada a cursos de engenharia,
 baseado no livro *Introdução à Programação e aos Algoritmos* (J. A. Ribeiro, LTC, 2019).
+
+O livro e este material servem a qualquer curso de graduação que ensine computação, e também a
+quem quer aprender por conta própria: os slides, os exemplos e os notebooks podem ser usados e
+adaptados para outras turmas e áreas (veja as licenças no fim).
 
 * **Repositório:** <https://github.com/jaraujouerj/algoritmos-computacionais-aulas> ([baixar tudo em ZIP](https://github.com/jaraujouerj/algoritmos-computacionais-aulas/archive/refs/heads/main.zip))
 * **Slides** em LaTeX (Beamer, 16:9): um arquivo por aula, em [`slides/`](slides/).
